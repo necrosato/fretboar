@@ -144,7 +144,7 @@ class Fretboard:
     def wrapData(self, data, start, end):
         legend, lines, slines, spaces = self.border(start, end)
         data ='\n'.join(reversed([slines + '\n' + string for string in data]))
-        return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend
+        return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + '\n'
 
 
     def border(self, start, end):
@@ -231,6 +231,54 @@ def parse_args():
     return parser.parse_args()
 
 
+def setMajorScale(fretboard, scale, root, colors):
+    assert root is not None, 'must give root when giving a scale'
+    major_scale = MajorScale([MajorNote.fromStr(s) for s in scale])
+    fretboard.setMajor(Note.fromStr(root), major_scale)
+    print('Major Relative Scale ({}):'.format(major_scale))
+    fretboard.setColors(colors)
+    return fretboard
+
+def setChromaticScale(retboard, scale, root, colors):
+    ''' scale should be 12 len binary list '''
+    assert root is not None, 'must give root when giving a scale'
+    assert len(scale) == 12, 'chromatic scale must be exactly 12 semitones'
+    i = 1
+    chromatic_notes = []
+    for c in scale:
+        if c == 0:
+            chromatic_notes.append(c)
+        else:
+            chromatic_notes.append(i)
+            i+=1
+    fretboard.setChromatic(Note.fromStr(root), ChromaticScale(chromatic_notes))
+    print('Chromatic Relative Scale ({}):'.format(chromatic_notes))
+    fretboard.setColors(colors)
+    return fretboard
+
+def setFromScaleName(fretboard, name, root, colors):
+    assert root is not None, 'must give root when giving a scale'
+    assert name in modes, 'invalid mode name, run modes.py to get a list of valid mode names'
+    mode = modes[name]
+    fretboard.setChromatic(Note.fromStr(root), mode.chromatic)
+    print('Named Scale Mode {} ({}):'.format(name, str(mode.chromatic)))
+    fretboard.setColors(colors)
+    return fretboard
+
+def intervalSubsets(fretboard, intervals, colors):
+    distances = [intervals[i] - intervals[i - 1] for i in range(1, len(intervals))]
+    subsets = []
+    for i in range(fretboard.notesInScale):
+        subset = [i+1]
+        for distance in distances:
+            subset.append(fretboard.notesInScale if (subset[-1] + distance) == fretboard.notesInScale else (subset[-1] + distance) % fretboard.notesInScale)
+        intervalColors = {}
+        for j in range(len(subset)):
+            if intervals[j] in colors:
+                intervalColors[subset[j]] = colors[intervals[j]]
+        subsets.append((subset, fretboard.scaleSubset(subset, intervalColors)))
+    return subsets
+
 
 def main():
     args = parse_args()
@@ -240,66 +288,32 @@ def main():
         colors[note].bg = backgrounds[note].bg
     end = args.frets if args.end is None else args.end
     inlayColor = Color(default_fg if not args.inlay_color else args.inlay_color, args.inlay_background)
-    fretboard = Fretboard(args.tuning, args.frets, InlayPattern.DotsOnFirstString(inlayColor, args.inlay))
+    fretboard = Fretboard(args.tuning, args.frets, InlayPattern.SplitTopBottomDots(inlayColor, args.inlay))
     print('Full Fretboard:')
     fretboard.setColors(colors)
     print(fretboard.fullStr(args.start, end))
-    print()
 
     if args.major_scale is not None:
-        assert args.root is not None, 'must give root when giving a scale'
-        major_scale = MajorScale([MajorNote.fromStr(s) for s in args.major_scale])
-        fretboard.setMajor(Note.fromStr(args.root), major_scale)
-        print('Major Relative Scale ({}):'.format(major_scale))
-        fretboard.setColors(colors)
+        setMajorScale(fretboard, args.scale, args.root, colors)
         print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
-        print()
     elif args.chromatic_scale is not None:
-        assert args.root is not None, 'must give root when giving a scale'
-        assert len(args.chromatic_scale) == 12, 'chromatic scale must be exactly 12 semitones'
-        i = 1
-        chromatic_notes = []
-        for c in args.chromatic_scale:
-            if c == 0:
-                chromatic_notes.append(c)
-            else:
-                chromatic_notes.append(i)
-                i+=1
-        fretboard.setChromatic(Note.fromStr(args.root), ChromaticScale(chromatic_notes))
-        print('Chromatic Relative Scale ({}):'.format(chromatic_notes))
-        fretboard.setColors(colors)
+        setChromaticScale(fretboard, args.chromatic_scale, args.root, colors)
         print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
-        print()
     elif args.mode_name is not None:
-        assert args.root is not None, 'must give root when giving a scale'
-        assert args.mode_name in modes, 'invalid mode name, run modes.py to get a list of valid mode names'
-        mode = modes[args.mode_name]
-        fretboard.setChromatic(Note.fromStr(args.root), mode.chromatic)
-        print('Named Scale Mode {} ({}):'.format(args.mode_name, str(mode.chromatic)))
-        fretboard.setColors(colors)
+        setFromScaleName(fretboard, args.mode_name, args.root, colors)
         print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
-        print()
     if args.subset:
-        subset = fretboard.scaleSubset(args.subset)
         print('Scale Subset ({}):'.format(args.subset))
-        fretboard.setColors(colors)
+        subset = fretboard.scaleSubset(args.subset)
         print(subset.str(args.start, end, args.print_notes, args.print_numbers))
-        print()
     if args.intervals:
+        subsets = intervalSubsets(fretboard, args.intervals, colors)
         print('Intervals ({}):'.format(args.intervals))
-        distances = [args.intervals[i] - args.intervals[i - 1] for i in range(1, len(args.intervals))]
-        print(fretboard.notesInScale)
-        for i in range(fretboard.notesInScale):
-            subset = [i+1]
-            for distance in distances:
-                subset.append(fretboard.notesInScale if (subset[-1] + distance) == fretboard.notesInScale else (subset[-1] + distance) % fretboard.notesInScale)
-            print('Scale Subset ({}):'.format(subset))
-            intervalColors = {}
-            for j in range(len(subset)):
-                if args.intervals[j] in colors:
-                    intervalColors[subset[j]] = colors[args.intervals[j]]
-            print(fretboard.scaleSubset(subset, intervalColors).str(args.start, end, args.print_notes, args.print_numbers))
-            print()
+        for intervals, subset in subsets:
+            print('Scale Subset ({}):'.format(intervals))
+            print(subset.str(args.start, end, args.print_notes, args.print_numbers))
+
+
 
 if __name__=='__main__':
     main()
