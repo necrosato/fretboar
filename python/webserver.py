@@ -17,54 +17,6 @@ def GetLogger(name='Fretboard'):
 
 from flask import Flask, Response, request, render_template
 
-def create_hover_tool(key):
-    return HoverTool(tooltips=[('date', '@date_str'), (key, '@' + key)])
-
-
-def create_bar_chart(data, title, x_name, y_name, hover_tool=None,
-                     width=1200, height=300, days=None):
-    '''Creates a bar chart plot with the exact styling for the centcom
-       dashboard. Pass in data as a dictionary, desired plot title,
-       name of x axis, y axis and the hover tool HTML.
-    '''
-    source = ColumnDataSource(data)
-    date_end = max(data[x_name])
-    if days is None:
-        date_start = min(data[x_name])
-    else:
-        date_start = date_end - datetime.timedelta(days=days)
-    xdr = Range1d(start=date_start, end=date_end)
-    ydr = Range1d(start=min(data[y_name]),end=max(data[y_name]))
-
-    tools = []
-    if hover_tool:
-        tools = [hover_tool,]
-
-    plot = figure(title=title, x_range=xdr, y_range=ydr, plot_width=width,
-                  plot_height=height, min_border=0, toolbar_location='above', tools=tools,
-                  sizing_mode='scale_width', outline_line_color='#666666', x_axis_type='datetime')
-
-    line_glyph = Line(x=x_name, y=y_name, line_width=2, line_color='#e12127')
-    circle_glyph = Circle(x=x_name, y=y_name, size=3, line_width=2, line_color='#e12127', fill_color='#e12127')
-    plot.add_glyph(source, line_glyph)
-    plot.add_glyph(source, circle_glyph)
-
-    xaxis = LinearAxis()
-    yaxis = LinearAxis()
-
-    plot.add_layout(Grid(dimension=0, ticker=xaxis.ticker))
-    plot.add_layout(Grid(dimension=1, ticker=yaxis.ticker))
-    plot.toolbar.logo = None
-    plot.min_border_top = 0
-    plot.xgrid.grid_line_color = None
-    plot.ygrid.grid_line_color = '#999999'
-    plot.yaxis.axis_label = y_name
-    plot.ygrid.grid_line_alpha = 0.1
-    plot.xaxis.axis_label = x_name 
-    plot.xaxis.major_label_orientation = 1
-    return plot
-
-
 class EndpointAction:
     '''
     action is expected to return a valid response
