@@ -4,7 +4,7 @@ import os
 from flask import Flask, Response, request, render_template
 sys.path.append(os.path.join(os.path.dirname(__file__), './'))
 from fretboard import *
-import subprocess
+from ansi2html import Ansi2HTMLConverter
 
 
 def GetLogger(name='Fretboard'):
@@ -68,7 +68,7 @@ class FretboardWebServer:
         '''
         Index page
         '''
-        args = parse_args(['-n', 'major ionian', '-r', 'A', '--print_numbers', '--print_notes', '-s', '1', '3', '5', '-i', '1', '2', '--color', '1', 'red'])
+        args = parse_args(['-n', 'major', 'ionian', '-r', 'A', '--print_numbers', '--print_notes', '-s', '1', '3', '5', '-i', '1', '2', '--color', '1', 'red', '--background', '1', 'white'])
         end = args.frets if args.end is None else args.end
         fretboards = getFretboardsWithName(args)
         data = ''
@@ -76,9 +76,8 @@ class FretboardWebServer:
             data += name + '\n'
             data += fretboard.str(args.start, end, args.print_notes, args.print_numbers) + '\n'
 
-        p = subprocess.Popen('./ansi2html.sh', shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-        p.stdin.write(data.encode('utf-8'))
-        return p.communicate()
+        conv = Ansi2HTMLConverter()
+        return conv.convert(data)
 
     def run(self, port):
         '''

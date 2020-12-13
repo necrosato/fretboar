@@ -73,7 +73,7 @@ class String:
 
     def fretsStr(self, start, end):
         if start == 0:
-            return '{}:' + ('{}' + str(Color()) + '|') * (end - start - 1)
+            return '{}' + str(Color()) + ':' + ('{}' + str(Color()) + '|') * (end - start - 1)
         else:
             return ('{}' + str(Color()) + '|') * (end - start)
 
@@ -144,7 +144,7 @@ class Fretboard:
     def wrapData(self, data, start, end):
         legend, lines, slines, spaces = self.border(start, end)
         data ='\n'.join(reversed([slines + '\n' + string for string in data]))
-        return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + '\n'
+        return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + reset_code +'\n'
 
 
     def border(self, start, end):

@@ -28,6 +28,7 @@ bg_colors = {
 
 default_fg = 'white'
 default_bg = 'black'
+reset_code = '\u001b[0m'
 
 class Color:
     def __init__(self, fg=default_fg, bg=default_bg):
