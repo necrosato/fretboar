@@ -200,9 +200,9 @@ def parse_args(args = None):
     group.add_argument('-c','--chromatic_scale', nargs='+', type=int,
                        help='Specify the scale as a list of 12 distinct chromatic values. '
                             'Ex: 0 1 1 0 0 1 0 1 0 1 1 1')
-    group.add_argument('-n','--mode_name', type=str,
-                       help='Specify the scale mode via its name. '
-                            'run modes.py to get a list of scale names')
+    group.add_argument('-n','--mode_name', nargs=2, type=str,
+                       help='Specify the scale mode via its name and mode name. '
+                            'run modes.py to get a list of scale names and mode names')
     scale.add_argument('-r', '--root', action='store',
                        help='Give the root note of the scale, the first value in scale list.')
     scale.add_argument('-s', '--subset', nargs='+', type=int, default=[],
@@ -256,11 +256,11 @@ def setChromaticScale(retboard, scale, root, colors):
     fretboard.setColors(colors)
     return fretboard
 
-def setFromScaleName(fretboard, name, root, colors):
+def setFromScaleName(fretboard, scale, mode, root, colors):
     assert root is not None, 'must give root when giving a scale'
-    assert name in modes, 'invalid mode name, run modes.py to get a list of valid mode names'
-    mode = modes[name]
-    fretboard.setChromatic(Note.fromStr(root), mode.chromatic)
+    assert scale in scales, 'invalid scale name, run modes.py to get a list of valid mode names'
+    assert mode in scales[scale], 'invalid mode name, run modes.py to get a list of valid mode names'
+    fretboard.setChromatic(Note.fromStr(root), scales[scale][mode].chromatic)
     fretboard.setColors(colors)
     return fretboard
 
@@ -298,7 +298,7 @@ def getFretboardsWithName(args):
         setChromaticScale(fretboard, args.chromatic_scale, args.root, colors)
         fretboards.append(('Chromatic Binary Scale Formula {}'.format(args.chromatic_scale), fretboard))
     elif args.mode_name is not None:
-        setFromScaleName(fretboard, args.mode_name, args.root, colors)
+        setFromScaleName(fretboard, args.mode_name[0], args.mode_name[1], args.root, colors)
         fretboards.append(('Mode Name {}'.format(args.mode_name), fretboard))
     if args.subset and args.intervals:
         subsets = intervalSubsets(fretboard, args.subset, args.intervals, colors)
