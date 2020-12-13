@@ -186,7 +186,7 @@ class Fretboard:
                 if string < len(self.strings):
                     self.strings[string].setInlays(pattern.allInlays[string])
 
-def parse_args():
+def parse_args(args = None):
     parser = argparse.ArgumentParser(description="Create a fretboard chart")
     parser.add_argument('-t','--tuning', nargs='+', default=['E', 'A', 'D', 'G', 'B', 'E'],
                         help='A list of string tunings to use')
@@ -208,7 +208,7 @@ def parse_args():
     scale.add_argument('-s', '--subset', nargs='+', type=int, default=[],
                        help='Give a subset of relative notes to extract from the scale')
     scale.add_argument('-i', '--intervals', nargs='+', type=int, default=[],
-                       help='Print given interval groupings for every note in the scale')
+                       help='Print given subset groupings for every given interval in the scale')
     output = parser.add_argument_group('output')
     output.add_argument('--print_numbers', action='store_true', default=False,
                         help='Output the fretboard with relative numeric scale note numbers')
@@ -228,6 +228,8 @@ def parse_args():
                         help='set inlay character color')
     output.add_argument('--inlay_background', type=str, default='',
                         help='set inlay background color')
+    if args:
+        return parser.parse_args(args)
     return parser.parse_args()
 
 
@@ -235,7 +237,6 @@ def setMajorScale(fretboard, scale, root, colors):
     assert root is not None, 'must give root when giving a scale'
     major_scale = MajorScale([MajorNote.fromStr(s) for s in scale])
     fretboard.setMajor(Note.fromStr(root), major_scale)
-    print('Major Relative Scale ({}):'.format(major_scale))
     fretboard.setColors(colors)
     return fretboard
 
@@ -252,7 +253,6 @@ def setChromaticScale(retboard, scale, root, colors):
             chromatic_notes.append(i)
             i+=1
     fretboard.setChromatic(Note.fromStr(root), ChromaticScale(chromatic_notes))
-    print('Chromatic Relative Scale ({}):'.format(chromatic_notes))
     fretboard.setColors(colors)
     return fretboard
 
@@ -261,27 +261,27 @@ def setFromScaleName(fretboard, name, root, colors):
     assert name in modes, 'invalid mode name, run modes.py to get a list of valid mode names'
     mode = modes[name]
     fretboard.setChromatic(Note.fromStr(root), mode.chromatic)
-    print('Named Scale Mode {} ({}):'.format(name, str(mode.chromatic)))
     fretboard.setColors(colors)
     return fretboard
 
-def intervalSubsets(fretboard, intervals, colors):
-    distances = [intervals[i] - intervals[i - 1] for i in range(1, len(intervals))]
+def intervalSubsets(fretboard, subsetBase, intervals, colors):
+    distances = [subsetBase[i] - subsetBase[i - 1] for i in range(1, len(subsetBase))]
+    offset = subsetBase[0] - 1
     subsets = []
-    for i in range(fretboard.notesInScale):
-        subset = [i+1]
+    for i in intervals:
+        subset = [i+offset]
         for distance in distances:
             subset.append(fretboard.notesInScale if (subset[-1] + distance) == fretboard.notesInScale else (subset[-1] + distance) % fretboard.notesInScale)
         intervalColors = {}
         for j in range(len(subset)):
-            if intervals[j] in colors:
-                intervalColors[subset[j]] = colors[intervals[j]]
+            if subsetBase[j] in colors:
+                intervalColors[subset[j]] = colors[subsetBase[j]]
         subsets.append((subset, fretboard.scaleSubset(subset, intervalColors)))
     return subsets
 
 
-def main():
-    args = parse_args()
+def getFretboardsWithName(args):
+    fretboards = []
     colors = {} if not args.color else { int(i): Color(c) for i, c in args.color }
     backgrounds = {} if not args.background else { int(i): Color(bg=c) for i, c in args.background }
     for note in backgrounds:
@@ -289,29 +289,32 @@ def main():
     end = args.frets if args.end is None else args.end
     inlayColor = Color(default_fg if not args.inlay_color else args.inlay_color, args.inlay_background)
     fretboard = Fretboard(args.tuning, args.frets, InlayPattern.SplitTopBottomDots(inlayColor, args.inlay))
-    print('Full Fretboard:')
     fretboard.setColors(colors)
-    print(fretboard.fullStr(args.start, end))
 
     if args.major_scale is not None:
         setMajorScale(fretboard, args.scale, args.root, colors)
-        print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
+        fretboards.append(('Major Relative Scale Formula {}'.format(args.major_scale), fretboard))
     elif args.chromatic_scale is not None:
         setChromaticScale(fretboard, args.chromatic_scale, args.root, colors)
-        print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
+        fretboards.append(('Chromatic Binary Scale Formula {}'.format(args.chromatic_scale), fretboard))
     elif args.mode_name is not None:
         setFromScaleName(fretboard, args.mode_name, args.root, colors)
-        print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
-    if args.subset:
-        print('Scale Subset ({}):'.format(args.subset))
-        subset = fretboard.scaleSubset(args.subset)
-        print(subset.str(args.start, end, args.print_notes, args.print_numbers))
-    if args.intervals:
-        subsets = intervalSubsets(fretboard, args.intervals, colors)
-        print('Intervals ({}):'.format(args.intervals))
+        fretboards.append(('Mode Name {}'.format(args.mode_name), fretboard))
+    if args.subset and args.intervals:
+        subsets = intervalSubsets(fretboard, args.subset, args.intervals, colors)
         for intervals, subset in subsets:
-            print('Scale Subset ({}):'.format(intervals))
-            print(subset.str(args.start, end, args.print_notes, args.print_numbers))
+            fretboards.append(('Interval Subset ({}):'.format(intervals), subset))
+    return fretboards
+
+
+
+def main():
+    args = parse_args()
+    end = args.frets if args.end is None else args.end
+    fretboards = getFretboardsWithName(args)
+    for name, fretboard in fretboards:
+        print(name)
+        print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
 
 
 if __name__=='__main__':
