@@ -292,7 +292,7 @@ def getFretboardsWithName(args):
     fretboard.setColors(colors)
 
     if args.major_scale is not None:
-        setMajorScale(fretboard, args.scale, args.root, colors)
+        setMajorScale(fretboard, args.major_scale, args.root, colors)
         fretboards.append(('Major Relative Scale Formula {}'.format(args.major_scale), fretboard))
     elif args.chromatic_scale is not None:
         setChromaticScale(fretboard, args.chromatic_scale, args.root, colors)
