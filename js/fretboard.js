@@ -1,38 +1,68 @@
 
 /**
+ * BEGIN HELPERS
+ */
+
+function padString(loc='^', pad=' ', width, s) {
+    var padCount = width - s.length
+    if (padCount < 1) {
+        return s
+    }
+    var padL = 0
+    var padR = 0
+    if (loc == '^') {
+        padL = Math.floor(padCount / 2)    
+        padR = Math.ceil(padCount / 2)    
+    } else if (loc == '<') {
+        padR = padCount
+    } else if (loc == '>') {
+        padL = padCount
+    }
+    return ' '.repeat(padL) + s + ' '.repeat(padR)
+}
+
+/**
+ * END HELPERS
+ */
+
+/**
  * BEGIN COLORS
  */
 
+/**
+ * BEGIN ARGS
+ */
+
 colors = {
-        'black'  : '\u001b[30m',
-        'red'    : '\u001b[31m',
-        'green'  : '\u001b[32m',
-        'yellow' : '\u001b[33m',
-        'blue'   : '\u001b[34m',
-        'magenta': '\u001b[35m',
-        'cyan'   : '\u001b[36m',
-        'white'  : '\u001b[97m',
-        'light-grey'  : '\u001b[37m',
-        'grey'   : '\u001b[90m',
+        'black'  : '\x1b[30m',
+        'red'    : '\x1b[31m',
+        'green'  : '\x1b[32m',
+        'yellow' : '\x1b[33m',
+        'blue'   : '\x1b[34m',
+        'magenta': '\x1b[35m',
+        'cyan'   : '\x1b[36m',
+        'white'  : '\x1b[97m',
+        'light-grey'  : '\x1b[37m',
+        'grey'   : '\x1b[90m',
         ''       : ''
         }
 bg_colors = {
-        'black'  : '\u001b[40m',
-        'red'    : '\u001b[41m',
-        'green'  : '\u001b[42m',
-        'yellow' : '\u001b[43m',
-        'blue'   : '\u001b[44m',
-        'magenta': '\u001b[45m',
-        'cyan'   : '\u001b[46m',
-        'white'  : '\u001b[107m',
-        'light-grey'  : '\u001b[47m',
-        'grey'   : '\u001b[100m',
+        'black'  : '\x1b[40m',
+        'red'    : '\x1b[41m',
+        'green'  : '\x1b[42m',
+        'yellow' : '\x1b[43m',
+        'blue'   : '\x1b[44m',
+        'magenta': '\x1b[45m',
+        'cyan'   : '\x1b[46m',
+        'white'  : '\x1b[107m',
+        'light-grey'  : '\x1b[47m',
+        'grey'   : '\x1b[100m',
         ''       : ''
         }
 
 default_fg = 'white'
 default_bg = 'black'
-reset_code = '\u001b[0m'
+reset_code = '\x1b[0m'
 
 class Color {
     constructor(fg=default_fg, bg=default_bg) {
@@ -43,7 +73,6 @@ class Color {
         return colors[this.fg] + bg_colors[this.bg]
     }
 }
-
 
 /**
  * END COLORS
@@ -72,14 +101,14 @@ class Inlays {
 
     setColor(color) {
         //  set same color for all inlays // 
-        for (i in this.frets) {
+        for (var i in this.frets) {
             this.frets[i].color = color
         }
     }
 
     setChar(design) {
         //  set same design for all inlays // 
-        for (i in this.frets) {
+        for (var i in this.frets) {
             this.frets[i].design = design
         }
     }
@@ -95,7 +124,7 @@ function inlaysFromFrets(frets, inlay) {
     for (f in frets) {
       inlays[f] = inlay
     }
-    return Inlays(inlays)
+    return new Inlays(inlays)
 }
 
 class InlayPattern {
@@ -106,31 +135,31 @@ class InlayPattern {
 }
 
 function dotInlays(color, fretNums, design=null) {
-    inlays = {}
-    for (i in fretNums) {
+    var inlays = {}
+    fretNums.forEach(function(i) {
         if (design==null) {
-            inlays[i] = Inlay(color, i in doubleDotFrets ? ':' : '.')
+            inlays[i] = new Inlay(color, doubleDotFrets.includes(i) ? ':' : '.')
         } else {
-            inlays[i] = Inlay(color, design)
+            inlays[i] = new Inlay(color, design)
         }
-    }
-    return Inlays(inlays)
+    })
+    return new Inlays(inlays)
 }
 
 function dotsOnFirstString(color, design=null) {
     firstStringInlays = dotInlays(color, standardInlayFrets, design)
-    return InlayPattern({'0': firstStringInlays})
+    return new InlayPattern({'0': firstStringInlays})
 }
 
 function dotsOnLastString(color, design=null) {
     lastStringInlays = dotInlays(color, standardInlayFrets, design)
-    return InlayPattern({'-1': lastStringInlays})
+    return new InlayPattern({'-1': lastStringInlays})
 }
 
-function dplitTopBottomDots(color, design=null) {
+function splitTopBottomDots(color, design=null) {
     firstStringInlays = dotInlays(color, bottomFrets, design)
     lastStringInlays = dotInlays(color, topFrets, design)
-    return InlayPattern({'0': firstStringInlays, '-1': lastStringInlays})
+    return new InlayPattern({'0': firstStringInlays, '-1': lastStringInlays})
 }
 /**
  * END INLAYS
@@ -203,37 +232,37 @@ class Note {
         return this.letter + this.accidental
     }
 
-    fromStr(s) {
+    static fromStr(s) {
         if (s.length == 1) {
-            return this(s)
+            return new this(s)
         }
-        if (s[0] in Note.letters) {
-            return this(s[0], s[1])
+        if (s[0] in letters) {
+            return  new this(s[0], s[1])
         }
-        return this(s[1], s[0])
+        return new this(s[1], s[0])
     }
 
     noteFromOffset(offset) {
-        val = (this.val + offset) % 12
-        if (val in Note.letterVals) {
-            return this(letterVals[val])
+        var val = (this.val + offset) % 12
+        if (val in letterVals) {
+            return new Note(letterVals[val])
         }
         val = (val + 1) % 12
-        return this(letterVals[val], 'b')
+        return new Note(letterVals[val], 'b')
     }
 
     semitoneUp() {
         if ((this.val + 1) in letterVals) {
-            return this(letterVals[this.val + 1])
+            return new Note(letterVals[this.val + 1])
         }
-        return this(letterVals[this.val], '#')
+        return new Note(letterVals[this.val], '#')
     }
 
     semitoneDown() {
         if ((this.val - 1) in letterVals) {
-            return this(letterVals[this.val - 1])
+            return new Note(letterVals[this.val - 1])
         }
-        return this(letterVals[this.val], 'b')
+        return new Note(letterVals[this.val], 'b')
     }
 }
 
@@ -246,13 +275,6 @@ class ChromaticScale {
         } else {
             this.notes = notes
         }
-        var notesInScale = 0
-        this.notes.forEach(function(i) {
-            if (i) {
-                notesInScale++
-            }
-        })
-        this.notesInScale = notesInScale
     }
 
     toString() {
@@ -264,6 +286,16 @@ class ChromaticScale {
         // or moving the last n seminotes to the beginning if value is negative
         return new ChromaticScale(this.notes.slice(semitones).concat(this.notes.slice(0,semitones)))
     }
+
+    notesInScale() {
+        var notesInScale = 0
+        this.notes.forEach(function(i) {
+            if (i) {
+                notesInScale++
+            }
+        })
+        return notesInScale
+    } 
 }
 
 numToChromatic = {
@@ -404,7 +436,7 @@ function addScaleMajorFormula(scale, modes, majorFormula) {
 
 function addAllModes(scale, base) {
     var modeNames = []
-    for (i = 1; i <= base.notesInScale; i++) {
+    for (i = 1; i <= base.notesInScale(); i++) {
         modeNames.push(i)
     }
     addScale(scale, modeNames, base)
@@ -452,7 +484,7 @@ function logScales() {
     }
 }
 
-logScales()
+//logScales()
 
 
 /**
@@ -462,319 +494,422 @@ logScales()
 
 /**
  * BEGIN FRETBOARD
+ */
 
-class Fret:
-    constructor(note, index, color, inlay=' '):
+class Fret {
+    constructor(note, index, color, inlay=' ') {
         //  A Note and a numeric index for which note in a relative scale // 
         this.note = note
         this.index = index
         this.color = color
         this.inlay = inlay
+    }
 
-    indexStr(this):
-        return '' if this.index == 0 else str(this.index)
+    indexStr() {
+        return this.index == 0 ? '' : this.index.toString()
+    }
 
-    noteStr(indexOnly=False):
-        if indexOnly and this.index == 0:
-            return ''
-        return str(this.note)
+    noteStr(indexOnly=false) {
+        return (indexOnly && this.index == 0) ? '' : this.note.toString()
+    }
 
-    fullStr(note, index, indexOnly=False):
-        noteStr = this.noteStr(indexOnly) if note else ''
-        indexStr = this.indexStr() if index else ''
-        return '{}{:^4}{}{}{:^4}'.format(str(this.color), noteStr, str(this.inlay), str(this.color), indexStr)
+    fullStr(note, index, indexOnly=false) {
+        var noteStr = note ? this.noteStr(indexOnly) : ''
+        var indexStr = index ? this.indexStr() : ''
+        return `${this.color}${padString('^', ' ', 4, noteStr)}${this.inlay}${this.color}${padString('^', ' ', 4, indexStr)}`
+    }
 
-    __str__(this):
-        return this.fullStr(True, True)
+    toString() {
+        return this.fullStr(true, true)
+    }
+}
 
-    __repr__(this):
-        return this.__str__()
-
-
-class String:
-    constructor(root, fretNum, inlays=null):
+class GuitarString {
+    constructor(root, fretNum, inlays=null) {
         this.root = root
-        this.colors = { i: Color() for i in range(13) }
-        this.frets = [Fret(root.noteFromOffset(i), 0, Color()) for i in range(fretNum)]
+        this.colors = {}
+        for (var i = 0; i < 13; i++)
+        {
+            colors[i] = new Color()
+        }
+        this.frets = []
+        for (var i = 0; i < fretNum; i++)
+        {
+            this.frets.push(new Fret(root.noteFromOffset(i), 0, new Color()))
+        }
         this.notesInScale = 0
         this.inlays = null
         this.setInlays(inlays)
+    }
 
-    setChromatic(chromatic):
+    setChromatic(chromatic) {
         this.notesInScale = chromatic.notesInScale()
-        for i in range(len(this.frets)):
-            c = i % 12
+        for (var i in this.frets) {
+            var c = i % 12
             this.frets[i].index = chromatic.notes[c]
-
-    notesStr(start, end):
-        notes = this.fretsStr(start, end)
-        return '{}{:<5} -{}'.format(str(Color()),
-                str(this.root), notes.format(*[f.fullStr(True, False) for f in this.frets[start:end]]))
-
-    notesWithIndexStr(start, end):
-        notes = this.fretsStr(start, end)
-        return '{}{:<5} -{}'.format(str(Color()),
-                str(this.root), notes.format(*[f.fullStr(True, False, True) if f.index else ' '*9 for f in this.frets[start:end]]))
-
-    indexStr(start, end):
-        notes = this.fretsStr(start, end)
-        return '{}{:<5} -{}'.format(str(Color()),
-                str(this.root), notes.format(*[f.fullStr(False, True) for f in this.frets[start:end]]))
-
-    fullStr(start, end, indexOnly=False):
-        notes = this.fretsStr(start, end)
-        return '{}{:<5} -{}'.format(str(Color()),
-                str(this.root), notes.format(*[f.fullStr(True, True, indexOnly) for f in this.frets[start:end]]))
-
-    fretsStr(start, end):
-        if start == 0:
-            return '{}' + str(Color()) + ':' + ('{}' + str(Color()) + '|') * (end - start - 1)
-        else:
-            return ('{}' + str(Color()) + '|') * (end - start)
+        }
+    }
 
 
-    __str__(this):
-        return this.fullStr(0, len(this.frets))
+    fretSep(i) {
+        return reset_code + ((i == 0) ? ':' : '|')
+    }
 
-    __repr__(this):
-        return this.__str__()
+    notesStr(start, end) {
+        var frets = []
+        for (var i = start; i < end; i++) {
+            frets.push(this.frets[i].fullStr(true, false))
+        }
+        var ffs = this.fretSep(start)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+    }
 
+    notesWithIndexStr(start, end) {
+        var frets = []
+        for (var i = start; i < end; i++) {
+            if (this.frets[i].index) {
+                frets.push(this.frets[i].fullStr(true, false, true))
+            } else {
+                frets.push(' '*9)
+            }
+        }
+        var ffs = this.fretSep(start)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+    }
 
-    scaleSubset(indices, newColors=null):
-        // 
-        get a string only containing frets with given indices
-        // 
-        if newColors is null:
-            newColors = this.colors
-        s = String(this.root, len(this.frets), this.inlays)
-        for i in range(len(this.frets)):
-            if this.frets[i].index in indices:
+    indexStr(start, end) {
+        var frets = []
+        for (var i = start; i < end; i++) {
+            frets.push(this.frets[i].fullStr(false, true))
+        }
+        var ffs = this.fretSep(start)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+    }
+
+    fullStr(start, end, indexOnly=false) {
+        var frets = []
+        for (var i = start; i < end; i++) {
+            frets.push(this.frets[i].fullStr(true, true, indexOnly))
+        }
+        var ffs = this.fretSep(start)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+    }
+
+    preludeStr() { return `${reset_code}${padString('<', ' ', 5, this.root.toString())} -` }
+
+    toString() {
+        return this.fullStr(0, this.frets.length)
+    }
+
+    scaleSubset(indices, newColors=null) {
+        var colors = newColors == null ? this.colors : newColors
+        var s = new GuitarString(this.root, this.frets.length, this.inlays)
+        for (var i in this.frets) {
+            if (indices.includes(this.frets[i].index)) {
                 s.frets[i].index = this.frets[i].index
-                s.frets[i].color = Color() if s.frets[i].index not in newColors else newColors[s.frets[i].index]
+                s.frets[i].color = s.frets[i].index in colors ? colors[s.frets[i].index] : new Color()
+            }
+        }
         return s
+    }
 
-    setColors(colors):
-        for note in colors:
+    setColors(colors) {
+        for (var note in colors) {
             this.colors[note] = colors[note]
-        for fret in this.frets:
-            fret.color = this.colors[fret.index]
+        }
+        for (var fret in this.frets) {
+            this.frets[fret].color = this.colors[this.frets[fret].index]
+        }
+    }
 
-    setInlays(inlays):
+    setInlays(inlays) {
         this.inlays=inlays
-        if inlays:
-            for i in inlays.frets:
-                if i < len(this.frets):
+        if (inlays) {
+            for (i in inlays.frets) {
+                if (i < this.frets.length) {
                     this.frets[i].inlay = inlays.frets[i]
+                }
+            }
+        }
+    }
+}
 
-class Fretboard:
-    constructor(roots, fretNum, inlayPattern=null):
-        this.strings = [String(Note.fromStr(root), fretNum) for root in roots]
+class Fretboard {
+    constructor(roots, fretNum, inlayPattern=null) {
+        var strings = []
+        for (i in roots) {
+            strings.push(new GuitarString(Note.fromStr(roots[i]), fretNum))
+        }
+        this.strings = strings
         this.roots = roots
         this.fretNum = fretNum
         this.notesInScale = 0
         this.setInlayPattern(inlayPattern)
+    }
 
-    setChromatic(root, chromatic):
+    setChromatic(root, chromatic) {
         this.notesInScale = chromatic.notesInScale()
-        for string in this.strings:
-            offset = root.offset(string.root)
-            rot = chromatic.rotate(offset)
-            string.setChromatic(rot)
+        for (i in this.strings) {
+            var offset = root.offset(this.strings[i].root)
+            var rot = chromatic.rotate(offset)
+            this.strings[i].setChromatic(rot)
+        }
+    }
 
-    setMajor(root, major):
+    setMajor(root, major) {
         this.setChromatic(root, major.chromatic())
+    }
 
-    notesStr(start, end):
-        return this.wrapData([s.notesStr(start, end) for s in this.strings], start, end)
+    notesStr(start, end) {
+        var data = []
+        for (i in this.strings) { data.push(this.strings[i].notesStr(start, end)) }
+        return this.wrapData(data, start, end)
+    }
 
-    notesWithIndexStr(start, end):
-        return this.wrapData([s.notesWithIndexStr(start, end) for s in this.strings], start, end)
+    notesWithIndexStr(start, end) {
+        var data = []
+        for (i in this.strings) { data.push(this.strings[i].notesWithIndexStr(start, end)) }
+        return this.wrapData(data, start, end)
+    }
 
-    indexStr(start, end):
-        return this.wrapData([s.indexStr(start, end) for s in this.strings], start, end)
+    indexStr(start, end) {
+        var data = []
+        for (i in this.strings) { data.push(this.strings[i].indexStr(start, end)) }
+        return this.wrapData(data, start, end)
+    }
 
-    fullStr(start, end, indexOnly=False):
-        return this.wrapData([s.fullStr(start, end, indexOnly) for s in this.strings], start, end)
+    fullStr(start, end, indexOnly=false) {
+        var data = []
+        for (i in this.strings) { data.push(this.strings[i].fullStr(start, end, indexOnly)) }
+        return this.wrapData(data, start, end)
+    }
 
-    wrapData(data, start, end):
-        legend, lines, slines, spaces = this.border(start, end)
-        data ='\n'.join(reversed([slines + '\n' + string for string in data]))
+    wrapData(data, start, end) {
+        var legend, lines, slines, spaces
+        [legend, lines, slines, spaces] = this.border(start, end)
+        data = data.reverse().join('\n' + slines + '\n')
         return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + reset_code +'\n'
+    }
 
 
-    border(start, end):
-        legend = '{:<8}'.format('Fret:') + ''.join(['{:^10}'.format(i) for i in range(start, end)])
-        lines = '_' * len(legend)
-        slines = '-' * len(legend)
-        spaces = ' ' * len(legend)
-        return (str(Color()) + l for l in [legend, lines, slines, spaces])
+    border(start, end) {
+        var frets = []
+        for (var i = start; i<end; i++) { frets.push(padString('^', ' ', 10, i.toString())) }
+        var legend = `Fret:     ` + frets.join('')
+        var lines = '_'.repeat(legend.length)
+        var slines = '-'.repeat(legend.length)
+        var spaces = ' '.repeat(legend.length)
+        return [new Color() + legend,
+                new Color() + lines,
+                new Color() + slines,
+                new Color() + spaces]
+    }
 
-    str(start, end, notes, index):
-        if notes and index:
-            return this.fullStr(start, end, True)
-        elif notes:
+    str(start, end, notes, index) {
+        if (notes && index) {
+            return this.fullStr(start, end, true)
+        } else if (notes) {
             return this.notesWithIndexStr(start, end)
-        elif index:
+        } else if (index) {
             return this.indexStr(start, end)
+        }
+        return ''
+    }
 
-    __str__(this):
+    toString() {
         return this.fullStr(0, this.fretNum)
+    }
 
-    __repr__(this):
-        return this.__str__()
-
-    scaleSubset(indices, newColors=null):
-        f = Fretboard(this.roots, this.fretNum, this.inlayPattern)
-        for i in range(len(f.strings)):
+    scaleSubset(indices, newColors=null) {
+        var f = new Fretboard(this.roots, this.fretNum, this.inlayPattern)
+        for (var i in f.strings) {
             f.strings[i] = this.strings[i].scaleSubset(indices, newColors)
+        }
         return f
+    }
 
-    setColors(colors):
+    setColors(colors) {
         this.colors = colors
-        for string in this.strings:
-            string.setColors(colors)
+        for (var i in this.strings) {
+            this.strings[i].setColors(colors)
+        }
+    }
 
-    setInlayPattern(pattern):
+    setInlayPattern(pattern) {
         this.inlayPattern = pattern
-        if pattern:
-            for string in pattern.allInlays:
-                if string < len(this.strings):
-                    this.strings[string].setInlays(pattern.allInlays[string])
+        if (pattern != null) {
+            for (var string in pattern.allInlays) {
+                if (string < this.strings.length) {
+                    var i = string == -1 ? this.strings.length - 1 : string
+                    this.strings[i].setInlays(pattern.allInlays[string])
+                }
+            }
+        }
+    }
+}
 
-parse_args(args = null):
-    parser = argparse.ArgumentParser(description="Create a fretboard chart")
-    parser.add_argument('-t','--tuning', nargs='+', default=['E', 'A', 'D', 'G', 'B', 'E'],
-                        help='A list of string tunings to use')
-    parser.add_argument('-f','--frets', action='store', type=int, default=8,
-                        help='Define number of frets on the fretboard (including open string).')
-    scale = parser.add_argument_group('scale')
-    group = scale.add_mutually_exclusive_group()
-    group.add_argument('-m','--major_scale', nargs='+', type=str,
-                       help='Specify the scale as a list of ionian major relative number and accidentals. '
-                             'Ex: 1 2# 3 4 5 6b 7bb')
-    group.add_argument('-c','--chromatic_scale', nargs='+', type=int,
-                       help='Specify the scale as a list of 12 distinct chromatic values. '
-                            'Ex: 0 1 1 0 0 1 0 1 0 1 1 1')
-    group.add_argument('-n','--mode_name', nargs=2, type=str,
-                       help='Specify the scale mode via its name and mode name. '
-                            'run modes.py to get a list of scale names and mode names')
-    scale.add_argument('-r', '--root', action='store',
-                       help='Give the root note of the scale, the first value in scale list.')
-    scale.add_argument('-s', '--subset', nargs='+', type=int, default=[],
-                       help='Give a subset of relative notes to extract from the scale')
-    scale.add_argument('-i', '--intervals', nargs='+', type=int, default=[],
-                       help='Print given subset groupings for every given interval in the scale')
-    output = parser.add_argument_group('output')
-    output.add_argument('--print_numbers', action='store_true', default=False,
-                        help='Output the fretboard with relative numeric scale note numbers')
-    output.add_argument('--print_notes', action='store_true', default=False,
-                        help='Output the fretboard with musical note values')
-    output.add_argument('--start', type=int, default=0,
-                        help='the start fret to output')
-    output.add_argument('--end', type=int,
-                        help='the last fret to output')
-    output.add_argument('--color', nargs=2, action='append',
-                        help='set colors for each note in the mode/interval')
-    output.add_argument('--background', nargs=2, action='append',
-                        help='set background colors for each note in the mode/interval')
-    output.add_argument('--inlay', type=str, default='',
-                        help='set inlay character')
-    output.add_argument('--inlay_color', type=str, default='',
-                        help='set inlay character color')
-    output.add_argument('--inlay_background', type=str, default='',
-                        help='set inlay background color')
-    if args:
-        return parser.parse_args(args)
-    return parser.parse_args()
-
-
-setMajorScale(fretboard, scale, root, colors):
-    assert root is not null, 'must give root when giving a scale'
-    major_scale = MajorScale([MajorNote.fromStr(s) for s in scale])
+function setMajorScale(fretboard, formula, root, colors) {
+    var majorNotes = []
+    formula.forEach(function(s){ majorNotes.push(MajorNote.fromStr(s)) })
+    var major_scale = new MajorScale(majorNotes)
     fretboard.setMajor(Note.fromStr(root), major_scale)
     fretboard.setColors(colors)
     return fretboard
+}
 
-setChromaticScale(retboard, scale, root, colors):
+function setChromaticScale(fretboard, scale, root, colors) {
     //  scale should be 12 len binary list // 
-    assert root is not null, 'must give root when giving a scale'
-    assert len(scale) == 12, 'chromatic scale must be exactly 12 semitones'
-    i = 1
-    chromatic_notes = []
-    for c in scale:
-        if c == 0:
-            chromatic_notes.append(c)
-        else:
-            chromatic_notes.append(i)
+    var i = 1
+    var chromatic_notes = []
+    scale.forEach(function(c) {
+        if (c == 0) {
+            chromatic_notes.push(c)
+        } else {
+            chromatic_notes.push(i)
             i+=1
-    fretboard.setChromatic(Note.fromStr(root), ChromaticScale(chromatic_notes))
+        }
+    })
+    fretboard.setChromatic(Note.fromStr(root), new ChromaticScale(chromatic_notes))
     fretboard.setColors(colors)
     return fretboard
+}
 
-setFromScaleName(fretboard, scale, mode, root, colors):
-    assert root is not null, 'must give root when giving a scale'
-    assert scale in scales, 'invalid scale name, run modes.py to get a list of valid mode names'
-    assert mode in scales[scale], 'invalid mode name, run modes.py to get a list of valid mode names'
+function setFromScaleName(fretboard, scale, mode, root, colors) {
     fretboard.setChromatic(Note.fromStr(root), scales[scale][mode].chromatic)
     fretboard.setColors(colors)
     return fretboard
+}
 
-intervalSubsets(fretboard, subsetBase, intervals, colors):
-    distances = [subsetBase[i] - subsetBase[i - 1] for i in range(1, len(subsetBase))]
-    offset = subsetBase[0] - 1
-    subsets = []
-    for i in intervals:
-        subset = [i+offset]
-        for distance in distances:
-            subset.append(fretboard.notesInScale if (subset[-1] + distance) == fretboard.notesInScale else (subset[-1] + distance) % fretboard.notesInScale)
+function intervalSubsets(fretboard, subsetBase, intervals, colors) {
+    var distances = []
+    for (var i = 1; i < subsetBase.length; i++) {
+        distances.push(subsetBase[i] - subsetBase[i-1])
+    }
+    var offset = subsetBase[0] - 1
+    var subsets = []
+    intervals.forEach(function(i) {
+        var subset = [i+offset]
+        distances.forEach(function(d) {
+            if ((subset[subset.length-1] + d) == fretboard.notesInScale) {
+                subset.push(fretboard.notesInScale)
+            } else {
+                subset.push((subset[subset.length-1] + d) % fretboard.notesInScale)
+            }
+        })
         intervalColors = {}
-        for j in range(len(subset)):
-            if subsetBase[j] in colors:
+        for (var j = 0; j < subset.length; j++) {
+            if (subsetBase[j] in colors) {
                 intervalColors[subset[j]] = colors[subsetBase[j]]
-        subsets.append((subset, fretboard.scaleSubset(subset, intervalColors)))
+            }
+        }
+        subsets.push([subset, fretboard.scaleSubset(subset, intervalColors)])
+    })
     return subsets
+}
 
-
-getFretboardsWithName(args):
-    fretboards = []
-    colors = {} if not args.color else { int(i): Color(c) for i, c in args.color }
-    backgrounds = {} if not args.background else { int(i): Color(bg=c) for i, c in args.background }
-    for note in backgrounds:
-        colors[note].bg = backgrounds[note].bg
-    end = args.frets if args.end is null else args.end
-    inlayColor = Color(default_fg if not args.inlay_color else args.inlay_color, args.inlay_background)
-    fretboard = Fretboard(args.tuning, args.frets, InlayPattern.SplitTopBottomDots(inlayColor, args.inlay))
+function getFretboardsWithName(args) {
+    var fretboards = []
+    var colors = {}
+    for (i in args.colors) {
+        colors[i] = new Color(args.colors[i][0], args.colors[i][1])
+    }
+    end = args.end == null ? args.frets : args.end
+    inlayColor = new Color(args.inlay.color[0], args.inlay.color[1])
+    fretboard = new Fretboard(args.tuning, args.frets, splitTopBottomDots(inlayColor, args.inlay.pattern))
     fretboard.setColors(colors)
 
-    if args.major_scale is not null:
-        setMajorScale(fretboard, args.major_scale, args.root, colors)
-        fretboards.append(('Major Relative Scale Formula {}'.format(args.major_scale), fretboard))
-    elif args.chromatic_scale is not null:
-        setChromaticScale(fretboard, args.chromatic_scale, args.root, colors)
-        fretboards.append(('Chromatic Binary Scale Formula {}'.format(args.chromatic_scale), fretboard))
-    elif args.mode_name is not null:
-        setFromScaleName(fretboard, args.mode_name[0], args.mode_name[1], args.root, colors)
-        fretboards.append(('Mode Name {}'.format(args.mode_name), fretboard))
-    if args.subset and args.intervals:
-        subsets = intervalSubsets(fretboard, args.subset, args.intervals, colors)
-        for intervals, subset in subsets:
-            fretboards.append(('Interval Subset ({}):'.format(intervals), subset))
+    if (args.scale.major_formula != null) {
+        setMajorScale(fretboard, args.scale.major_formula, args.scale.root, colors)
+        fretboards.push([`Major Relative Scale Formula ${args.scale.major_formula}`, fretboard])
+    } else if (args.scale.chromatic_formula != null) {
+        setChromaticScale(fretboard, args.scale.chromatic_formula, args.scale.root, colors)
+        fretboards.push([`Chromatic Binary Scale Formula ${args.scale.chromatic_formula}`, fretboard])
+    } else if (args.scale.name != null) {
+        setFromScaleName(fretboard, args.scale.name[0], args.scale.name[1], args.scale.root, colors)
+        fretboards.push([`Mode Name ${args.scale.name}`, fretboard])
+    }
+    if (args.scale.subset && args.scale.intervals) {
+        var subsets = intervalSubsets(fretboard, args.scale.subset, args.scale.intervals, colors)
+        for (i in subsets) {
+            var intervals = subsets[i][0]
+            var subset = subsets[i][1]
+            fretboards.push([`Interval Subset (${intervals})`, subset])
+        }
+    }
     return fretboards
+}
 
-
-
-main():
-    args = parse_args()
-    end = args.frets if args.end is null else args.end
-    fretboards = getFretboardsWithName(args)
-    for name, fretboard in fretboards:
-        print(name)
-        print(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
-
-
-if __name__=='__main__':
-    main()
+/**
  * END FRETBOARD
  */
+
+var default_args = {
+    'tuning': ['E', 'A', 'D', 'G', 'B', 'E'],
+    'frets': 15,
+    'start': 0,
+    'end': null,
+    'print_notes': true,
+    'print_numbers': true,
+    
+    'colors': {
+        0: ['white', 'black'],
+        1: ['white', 'black'],
+        2: ['white', 'black'],
+        3: ['white', 'black'],
+        4: ['white', 'black'],
+        5: ['white', 'black'],
+        6: ['white', 'black'],
+        7: ['white', 'black'],
+        8: ['white', 'black'],
+        9: ['white', 'black'],
+       10: ['white', 'black'],
+       11: ['white', 'black'],
+       12: ['white', 'black']
+    },
+    'scale': {
+        'root': null,
+        'major_formula': null,
+        'chromatic_formula': null,
+        'name': null,
+        'subset': null,
+        'intervals': null
+    },
+    'inlay': {
+        'pattern': null,
+        'color': ['', '']
+    }
+}
+
+function test() {
+    args = JSON.parse(JSON.stringify(default_args))
+    args.scale.root = 'A'
+    //args.scale.name = ['major', 'ionian']
+    //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+    args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
+    args.colors[1] = ['red', 'white']
+    args.colors[3] = [default_fg, 'light-grey']
+    args.colors[5] = [default_fg, 'grey']
+    args.inlay.pattern = '*'
+    args.inlay.color = [default_fg, '']
+    args.scale.subset = [1, 3, 5]
+    args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
+    end = args.end == null ? args.frets : args.end
+    fretboards = getFretboardsWithName(args)
+    for (i in fretboards) {
+        var name = fretboards[i][0]
+        var fretboard = fretboards[i][1]
+        console.log(name)
+        console.log(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
+    }
+    console.log(args)
+    console.log(default_args)
+}
+
+test()
+
+/**
+ * END ARGS
+ */
+
 
 
