@@ -901,8 +901,6 @@ function test() {
         console.log(name)
         console.log(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
     }
-    console.log(args)
-    console.log(default_args)
 }
 
 test()
