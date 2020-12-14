@@ -29,40 +29,37 @@ function padString(loc='^', pad=' ', width, s) {
  * BEGIN COLORS
  */
 
-/**
- * BEGIN ARGS
- */
-
 colors = {
-        'black'  : '\x1b[30m',
-        'red'    : '\x1b[31m',
-        'green'  : '\x1b[32m',
-        'yellow' : '\x1b[33m',
-        'blue'   : '\x1b[34m',
-        'magenta': '\x1b[35m',
-        'cyan'   : '\x1b[36m',
-        'white'  : '\x1b[97m',
-        'light-grey'  : '\x1b[37m',
-        'grey'   : '\x1b[90m',
-        ''       : ''
+        'black'       : '\u001b[30m',
+        'red'         : '\u001b[31m',
+        'green'       : '\u001b[32m',
+        'yellow'      : '\u001b[33m',
+        'blue'        : '\u001b[34m',
+        'magenta'     : '\u001b[35m',
+        'cyan'        : '\u001b[36m',
+        'white'       : '\u001b[97m',
+        'light-grey'  : '\u001b[37m',
+        'grey'        : '\u001b[90m',
+        ''            : ''
         }
 bg_colors = {
-        'black'  : '\x1b[40m',
-        'red'    : '\x1b[41m',
-        'green'  : '\x1b[42m',
-        'yellow' : '\x1b[43m',
-        'blue'   : '\x1b[44m',
-        'magenta': '\x1b[45m',
-        'cyan'   : '\x1b[46m',
-        'white'  : '\x1b[107m',
-        'light-grey'  : '\x1b[47m',
-        'grey'   : '\x1b[100m',
-        ''       : ''
+        'black'       : '\u001b[40m',
+        'red'         : '\u001b[41m',
+        'green'       : '\u001b[42m',
+        'yellow'      : '\u001b[43m',
+        'blue'        : '\u001b[44m',
+        'magenta'     : '\u001b[45m',
+        'cyan'        : '\u001b[46m',
+        'white'       : '\u001b[107m',
+        'light-grey'  : '\u001b[47m',
+        'grey'        : '\u001b[100m',
+        ''            : ''
         }
 
+reset_code = '\u001b[0m'
+
 default_fg = 'white'
-default_bg = 'black'
-reset_code = '\x1b[0m'
+default_bg = 'red'
 
 class Color {
     constructor(fg=default_fg, bg=default_bg) {
@@ -491,7 +488,6 @@ function logScales() {
  * END SCALES/MODES
  */
 
-
 /**
  * BEGIN FRETBOARD
  */
@@ -552,7 +548,7 @@ class GuitarString {
 
 
     fretSep(i) {
-        return reset_code + ((i == 0) ? ':' : '|')
+        return new Color() + ((i == 0) ? ':' : '|')
     }
 
     notesStr(start, end) {
@@ -561,7 +557,7 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(true, false))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     notesWithIndexStr(start, end) {
@@ -574,7 +570,7 @@ class GuitarString {
             }
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     indexStr(start, end) {
@@ -583,7 +579,7 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(false, true))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     fullStr(start, end, indexOnly=false) {
@@ -592,10 +588,10 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(true, true, indexOnly))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1)
+        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
-    preludeStr() { return `${reset_code}${padString('<', ' ', 5, this.root.toString())} -` }
+    preludeStr() { return `${new Color()}${padString('<', ' ', 5, this.root.toString())} -` }
 
     toString() {
         return this.fullStr(0, this.frets.length)
@@ -688,7 +684,7 @@ class Fretboard {
         var legend, lines, slines, spaces
         [legend, lines, slines, spaces] = this.border(start, end)
         data = data.reverse().join('\n' + slines + '\n')
-        return legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + reset_code +'\n'
+        return new Color() + legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + reset_code +'\n'
     }
 
 
@@ -699,10 +695,10 @@ class Fretboard {
         var lines = '_'.repeat(legend.length)
         var slines = '-'.repeat(legend.length)
         var spaces = ' '.repeat(legend.length)
-        return [new Color() + legend,
-                new Color() + lines,
-                new Color() + slines,
-                new Color() + spaces]
+        return [ reset_code + legend + reset_code,
+                new Color() + lines + reset_code,
+                new Color() + slines + reset_code,
+                new Color() + spaces + reset_code]
     }
 
     str(start, end, notes, index) {
@@ -843,6 +839,10 @@ function getFretboardsWithName(args) {
  * END FRETBOARD
  */
 
+/**
+ * BEGIN ARGS
+ */
+
 var default_args = {
     'tuning': ['E', 'A', 'D', 'G', 'B', 'E'],
     'frets': 15,
@@ -852,19 +852,19 @@ var default_args = {
     'print_numbers': true,
     
     'colors': {
-        0: ['white', 'black'],
-        1: ['white', 'black'],
-        2: ['white', 'black'],
-        3: ['white', 'black'],
-        4: ['white', 'black'],
-        5: ['white', 'black'],
-        6: ['white', 'black'],
-        7: ['white', 'black'],
-        8: ['white', 'black'],
-        9: ['white', 'black'],
-       10: ['white', 'black'],
-       11: ['white', 'black'],
-       12: ['white', 'black']
+        0: [default_fg, default_bg],
+        1: [default_fg, default_bg],
+        2: [default_fg, default_bg],
+        3: [default_fg, default_bg],
+        4: [default_fg, default_bg],
+        5: [default_fg, default_bg],
+        6: [default_fg, default_bg],
+        7: [default_fg, default_bg],
+        8: [default_fg, default_bg],
+        9: [default_fg, default_bg],
+       10: [default_fg, default_bg],
+       11: [default_fg, default_bg],
+       12: [default_fg, default_bg]
     },
     'scale': {
         'root': null,
@@ -881,6 +881,7 @@ var default_args = {
 }
 
 function test() {
+    var testStr = ''
     args = JSON.parse(JSON.stringify(default_args))
     args.scale.root = 'A'
     //args.scale.name = ['major', 'ionian']
@@ -898,12 +899,13 @@ function test() {
     for (i in fretboards) {
         var name = fretboards[i][0]
         var fretboard = fretboards[i][1]
-        console.log(name)
-        console.log(fretboard.str(args.start, end, args.print_notes, args.print_numbers))
+        testStr += reset_code + name +'\n'
+        testStr += fretboard.str(args.start, end, args.print_notes, args.print_numbers) +'\n'
     }
+    return testStr
 }
 
-test()
+//console.log(test())
 
 /**
  * END ARGS
