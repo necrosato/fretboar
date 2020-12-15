@@ -1159,7 +1159,7 @@ function addFretboardOutput(){
     app.appendChild(document.createTextNode("Fretboard output: "));
     app.appendChild(document.createElement("br"));
     var fretboardOutput = document.createElement("pre");
-    fretboardOutput.style['line-height'] = 'normal'
+    fretboardOutput.style['line-height'] = "normal";
     fretboardOutput.id = "fretboard";
     app.appendChild(fretboardOutput);
     // Append a line break
