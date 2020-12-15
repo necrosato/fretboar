@@ -22,6 +22,26 @@ function padString(loc='^', pad=' ', width, s) {
     return ' '.repeat(padL) + s + ' '.repeat(padR)
 }
 
+function removeItemOnce(arr, value) {
+  var index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
+function removeItemAll(arr, value) {
+  var i = 0;
+  while (i < arr.length) {
+    if (arr[i] === value) {
+      arr.splice(i, 1);
+    } else {
+      ++i;
+    }
+  }
+  return arr;
+}
+
 /**
  * END HELPERS
  */
@@ -982,11 +1002,7 @@ function setStartFromFrets() {
 function setEndFromFrets() {
     end = document.getElementById('end')
     var maxEnd = document.getElementById('frets').value
-    var minEnd = document.getElementById('start').value + 1
-    oldEnd = end.selectedIndex < 0 ? maxEnd : end.selectedIndex
-    console.log(oldEnd)
-    console.log(maxEnd)
-    console.log(minEnd)
+    var minEnd = parseInt(document.getElementById('start').value) + 1
     clearSelect('end')
     for (var i = minEnd; i <= maxEnd; i++) {
         var option = document.createElement("option");
@@ -994,7 +1010,7 @@ function setEndFromFrets() {
         option.text = i;
         end.appendChild(option);
     }
-    end.selectedIndex = oldEnd > maxEnd ? maxEnd : (oldEnd < minEnd ? minEnd : oldEnd)
+    end.selectedIndex = maxEnd-minEnd
 }
 
 function setStartEndFromFrets() {
@@ -1009,6 +1025,7 @@ function addStart() {
     var input = document.createElement("select");
     input.name = "start";
     input.id = "start";
+    input.onchange = setEndFromFrets
     app.appendChild(input);
     setStartFromFrets()
     // Append a line break
@@ -1027,6 +1044,7 @@ function addEnd() {
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
+
 function addOutputArgs() {
     addTuning()
     addFrets()
@@ -1036,12 +1054,42 @@ function addOutputArgs() {
     //addPrintNotes()
 }
 
+function generateFretboards() {
+    var data = ''
+    args = JSON.parse(JSON.stringify(default_args))
+    args.tuning = removeItemAll(document.getElementById('tuning').value.split(' '), '')
+    args.frets = parseInt(document.getElementById('frets').value)
+    args.start = parseInt(document.getElementById('start').value)
+    args.end = parseInt(document.getElementById('end').value)
+
+    args.scale.root = 'A'
+    args.scale.name = ['major', 'aeolian']
+    //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
+    //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
+    args.colors[1] = ['red', 'white']
+    args.colors[3] = [default_fg, 'light-grey']
+    args.colors[5] = [default_fg, 'grey']
+    args.inlay.pattern = '*'
+    args.inlay.color = [default_fg, '']
+    args.scale.subset = [1, 3, 5]
+    args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
+    end = args.end == null ? args.frets : args.end
+    fretboards = getFretboardsWithName(args)
+    for (i in fretboards) {
+        var name = fretboards[i][0]
+        var fretboard = fretboards[i][1]
+        data += reset_code + name +'\n'
+        data += fretboard.str(args.start, end, args.print_notes, args.print_numbers) +'\n'
+    }
+    document.getElementById('fretboard').innerHTML = convert.toHtml(data)
+}
+
 function addButtons(){
     var app = document.getElementById("app");
     var generate = document.createElement("button");
     generate.id = 'generate';
     generate.textContent = 'Generate';
-    generate.onclick = testAnsiToHtml;
+    generate.onclick = generateFretboards;
     app.appendChild(generate);
     // Append a line break
     app.appendChild(document.createElement("br"));
