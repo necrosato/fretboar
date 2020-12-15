@@ -1169,6 +1169,6 @@ addScaleSelection() {
 }
 
 addOutputArgs()
-addScaleSelectoin()
+addScaleSelection()
 addButtons()
 addFretboardOutput()
