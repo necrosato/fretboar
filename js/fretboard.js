@@ -1070,6 +1070,34 @@ function addPrintNotes() {
     app.appendChild(document.createElement("br"));
 }
 
+function addColor(i) {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode(`Note ${i} color [foreground, background]: `));
+    // Create an <input> element, set its type and name attributes
+    var fgin = document.createElement("select");
+    var bgin = document.createElement("select");
+    fgin.name = `color_fg_${i}`;
+    bgin.name = `color_bg_${i}`;
+    fgin.id = `color_fg_${i}`;
+    bgin.id = `color_bg_${i}`;
+    for (var i in colors) {
+        var fg_option = document.createElement("option");
+        var bg_option = document.createElement("option");
+        fg_option.value = i;
+        bg_option.value = i;
+        fg_option.text = i;
+        bg_option.text = i;
+        fgin.appendChild(fg_option);
+        bgin.appendChild(bg_option);
+    }
+    fgin.value = default_fg
+    bgin.value = default_bg
+    app.appendChild(fgin);
+    app.appendChild(bgin);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
 function addOutputArgs() {
     addTuning()
     addFrets()
@@ -1077,6 +1105,7 @@ function addOutputArgs() {
     addEnd()
     addPrintNumbers()
     addPrintNotes()
+    for (i = 0; i <= 12; i++) { addColor(i) }
 }
 
 function generateFretboards() {
@@ -1089,13 +1118,16 @@ function generateFretboards() {
     args.print_numbers = document.getElementById('print_numbers').checked
     args.print_notes = document.getElementById('print_notes').checked
 
+    for (i = 0; i <= 12; i++) {
+        var fg_color = document.getElementById(`color_fg_${i}`).value
+        var bg_color = document.getElementById(`color_bg_${i}`).value
+        args.colors[i] = [fg_color, bg_color]
+    }
+
     args.scale.root = 'A'
     args.scale.name = ['major', 'ionian']
     //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
     //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
-    args.colors[1] = ['red', 'white']
-    args.colors[3] = [default_fg, 'light-grey']
-    args.colors[5] = [default_fg, 'grey']
     args.inlay.pattern = '*'
     args.inlay.color = [default_fg, '']
     args.scale.subset = [1, 3, 5]
