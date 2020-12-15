@@ -900,13 +900,20 @@ var default_args = {
     }
 }
 
+default_scale = {
+    'root': 'A',
+    'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+    'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
+    'name': ['major', 'ionian'],
+    'subset': '',
+    'intervals': [] 
+}
+
 function test() {
     var testStr = ''
     args = JSON.parse(JSON.stringify(default_args))
     args.scale.root = 'A'
     args.scale.name = ['major', 'aeolian']
-    //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
-    //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
     args.colors[1] = ['red', 'white']
     args.colors[3] = [default_fg, 'light-grey']
     args.colors[5] = [default_fg, 'grey']
@@ -938,12 +945,7 @@ function test() {
 var Convert = require('ansi-to-html');
 var convert = new Convert();
  
-function testAnsiToHtml() {
-  document.getElementById('fretboard').innerHTML = convert.toHtml(test())
-}
-
-function clearSelect(id) {
-    var select = document.getElementById(id);
+function clearSelect(select) {
     var length = select.options.length;
     for (i = length-1; i >= 0; i--) {
       select.options[i] = null;
@@ -987,7 +989,7 @@ function addFrets() {
 function setStartFromFrets() {
     start = document.getElementById('start')
     oldStart = start.selectedIndex < 0 ? 0 : start.selectedIndex
-    clearSelect('start')
+    clearSelect(start)
     var maxStart = document.getElementById('frets').value - 1
     for (var i = 0; i <= maxStart; i++) {
         var option = document.createElement("option");
@@ -1002,7 +1004,7 @@ function setEndFromFrets() {
     end = document.getElementById('end')
     var maxEnd = document.getElementById('frets').value
     var minEnd = parseInt(document.getElementById('start').value) + 1
-    clearSelect('end')
+    clearSelect(end)
     for (var i = minEnd; i <= maxEnd; i++) {
         var option = document.createElement("option");
         option.value = i;
@@ -1124,10 +1126,19 @@ function generateFretboards() {
         args.colors[i] = [fg_color, bg_color]
     }
 
-    args.scale.root = 'A'
-    args.scale.name = ['major', 'ionian']
-    //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
-    //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
+    args.scale.root = document.getElementById('root').value
+    if (document.getElementById('chromatic_selector').checked) {
+        chromatic_binary = []
+        removeItemAll(document.getElementById('chromatic_formula').value.split(' '), '').forEach(function(i) {
+            chromatic_binary.push(parseInt(i))
+        })
+        args.scale.chromatic_formula = chromatic_binary
+    } else if (document.getElementById('major_selector').checked) {
+        args.scale.major_formula = removeItemAll(document.getElementById('major_formula').value.split(' '), '')
+    } else if (document.getElementById('scale_name_selector').checked) {
+        args.scale.name = [document.getElementById('scale_name_select').value, document.getElementById('mode_name_select').value]
+    }
+
     args.inlay.pattern = '*'
     args.inlay.color = [default_fg, '']
     args.scale.subset = [1, 3, 5]
@@ -1159,14 +1170,125 @@ function addFretboardOutput(){
     app.appendChild(document.createTextNode("Fretboard output: "));
     app.appendChild(document.createElement("br"));
     var fretboardOutput = document.createElement("pre");
-    fretboardOutput.style['line-height'] = 'normal'
     fretboardOutput.id = "fretboard";
     app.appendChild(fretboardOutput);
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
 
-addScaleSelection() {
+function addRoot() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Scale Root Note: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "text";
+    input.name = "root";
+    input.id = "root";
+    input.defaultValue = default_scale.root
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addChromaticFormula() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Chromatic Scale Formula: "));
+    // Create an <input> element, set its type and name attributes
+    var check = document.createElement("input");
+    check.type = "radio"
+    check.name = "scale_selector";
+    check.id = "chromatic_selector";
+    check.checked = true
+
+    var input = document.createElement("input");
+    input.type = "text"
+    input.name = "chromatic_formula";
+    input.id = "chromatic_formula";
+    input.value = default_scale.chromatic_formula.join(' ')
+
+    app.appendChild(check);
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addMajorFormula() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Major Scale Formula: "));
+    // Create an <input> element, set its type and name attributes
+    var check = document.createElement("input");
+    check.type = "radio"
+    check.name = "scale_selector";
+    check.id = "major_selector";
+    check.checked = false 
+
+    var input = document.createElement("input");
+    input.type = "text"
+    input.name = "major_formula";
+    input.id = "major_formula";
+    input.value = default_scale.major_formula.join(' ')
+
+    app.appendChild(check);
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function setScaleBox() {
+    var scaleBox = document.getElementById(`scale_name_select`)
+    clearSelect(scaleBox)
+    for (var scale in scales) {
+        var option = document.createElement("option");
+        option.value = scale;
+        option.text = scale;
+        scaleBox.appendChild(option)
+    }
+}
+
+function setModeBox() {
+    var modeBox = document.getElementById(`mode_name_select`)
+    var scale = document.getElementById(`scale_name_select`).value
+    clearSelect(modeBox)
+    for (var mode in scales[scale]) {
+        var option = document.createElement("option");
+        option.value = mode;
+        option.text = mode;
+        modeBox.appendChild(option)
+    }
+}
+
+function addScaleName() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Scale/Mode Name: "));
+    // Create an <input> element, set its type and name attributes
+    var check = document.createElement("input");
+    check.type = "radio"
+    check.name = "scale_selector";
+    check.id = "scale_name_selector";
+    check.checked = false
+
+    var scaleBox = document.createElement("select");
+    var modeBox = document.createElement("select");
+    scaleBox.name = `scale_name_select`;
+    modeBox.name = `mode_name_select`;
+    scaleBox.id = `scale_name_select`;
+    modeBox.id = `mode_name_select`;
+    scaleBox.onchange = setModeBox
+
+    app.appendChild(check);
+    app.appendChild(scaleBox);
+    app.appendChild(modeBox);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+    setScaleBox()
+    setModeBox()
+}
+
+function addScaleSelection() {
+    addRoot()
+    addChromaticFormula()
+    addMajorFormula()
+    addScaleName()
 }
 
 addOutputArgs()
