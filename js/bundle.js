@@ -582,12 +582,13 @@ class GuitarString {
     }
 
     notesWithIndexStr(start, end) {
+        console.log("HERE")
         var frets = []
         for (var i = start; i < end; i++) {
             if (this.frets[i].index) {
                 frets.push(this.frets[i].fullStr(true, false, true))
             } else {
-                frets.push(' '*9)
+                frets.push(this.frets[i].fullStr(false, false, false))
             }
         }
         var ffs = this.fretSep(start)
@@ -972,7 +973,7 @@ function addFrets() {
     var input = document.createElement("select");
     input.name = "frets";
     input.id = "frets";
-    for (var i = 1; i <=24; i++) {
+    for (var i = 1; i <=25; i++) {
         var option = document.createElement("option");
         option.value = i;
         option.text = i;
@@ -1045,13 +1046,39 @@ function addEnd() {
     app.appendChild(document.createElement("br"));
 }
 
+function addPrintNumbers() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Print Note Numbers: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "checkbox"
+    input.id = "print_numbers";
+    input.checked = true
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addPrintNotes() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Print Note Letters: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "checkbox"
+    input.id = "print_notes";
+    input.checked = true
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
 function addOutputArgs() {
     addTuning()
     addFrets()
     addStart()
     addEnd()
-    //addPrintNumbers()
-    //addPrintNotes()
+    addPrintNumbers()
+    addPrintNotes()
 }
 
 function generateFretboards() {
@@ -1061,6 +1088,8 @@ function generateFretboards() {
     args.frets = parseInt(document.getElementById('frets').value)
     args.start = parseInt(document.getElementById('start').value)
     args.end = parseInt(document.getElementById('end').value)
+    args.print_numbers = document.getElementById('print_numbers').checked
+    args.print_notes = document.getElementById('print_notes').checked
 
     args.scale.root = 'A'
     args.scale.name = ['major', 'ionian']
@@ -1074,7 +1103,6 @@ function generateFretboards() {
     args.scale.subset = [1, 3, 5]
     args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
     fretboards = getFretboardsWithName(args)
-    console.log(args)
     for (i in fretboards) {
         var name = fretboards[i][0]
         var fretboard = fretboards[i][1]
