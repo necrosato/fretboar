@@ -1165,6 +1165,10 @@ function addFretboardOutput(){
     app.appendChild(document.createElement("br"));
 }
 
+addScaleSelection() {
+}
+
 addOutputArgs()
+addScaleSelectoin()
 addButtons()
 addFretboardOutput()
