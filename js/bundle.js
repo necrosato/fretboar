@@ -912,6 +912,9 @@ function test() {
  * END ARGS
  */
 
+/**
+ * BEGIN WEB DISPLAY
+ */
 
 var Convert = require('ansi-to-html');
 var convert = new Convert();
@@ -920,7 +923,145 @@ function testAnsiToHtml() {
   document.getElementById('fretboard').innerHTML = convert.toHtml(test())
 }
 
-testAnsiToHtml()
+function clearSelect(id) {
+    var select = document.getElementById(id);
+    var length = select.options.length;
+    for (i = length-1; i >= 0; i--) {
+      select.options[i] = null;
+    }
+}
+
+function addTuning() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("String Tunings: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "text";
+    input.name = "tuning";
+    input.id = "tuning";
+    input.defaultValue = default_args.tuning.join(' ')
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addFrets() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Frets: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("select");
+    input.name = "frets";
+    input.id = "frets";
+    for (var i = 1; i <=24; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        input.appendChild(option);
+    }
+    input.selectedIndex= default_args.frets-1
+    input.onchange = setStartEndFromFrets
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function setStartFromFrets() {
+    start = document.getElementById('start')
+    oldStart = start.selectedIndex < 0 ? 0 : start.selectedIndex
+    clearSelect('start')
+    var maxStart = document.getElementById('frets').value - 1
+    for (var i = 0; i <= maxStart; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        start.appendChild(option);
+    }
+    start.selectedIndex = oldStart > maxStart ? maxStart : oldStart
+}
+
+function setEndFromFrets() {
+    end = document.getElementById('end')
+    var maxEnd = document.getElementById('frets').value
+    var minEnd = document.getElementById('start').value + 1
+    oldEnd = end.selectedIndex < 0 ? maxEnd : end.selectedIndex
+    console.log(oldEnd)
+    console.log(maxEnd)
+    console.log(minEnd)
+    clearSelect('end')
+    for (var i = minEnd; i <= maxEnd; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        end.appendChild(option);
+    }
+    end.selectedIndex = oldEnd > maxEnd ? maxEnd : (oldEnd < minEnd ? minEnd : oldEnd)
+}
+
+function setStartEndFromFrets() {
+    setStartFromFrets()
+    setEndFromFrets()
+}
+
+function addStart() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Start Fret: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("select");
+    input.name = "start";
+    input.id = "start";
+    app.appendChild(input);
+    setStartFromFrets()
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addEnd() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("End Fret: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("select");
+    input.name = "end";
+    input.id = "end";
+    app.appendChild(input);
+    setEndFromFrets()
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+function addOutputArgs() {
+    addTuning()
+    addFrets()
+    addStart()
+    addEnd()
+    //addPrintNumbers()
+    //addPrintNotes()
+}
+
+function addButtons(){
+    var app = document.getElementById("app");
+    var generate = document.createElement("button");
+    generate.id = 'generate';
+    generate.textContent = 'Generate';
+    generate.onclick = testAnsiToHtml;
+    app.appendChild(generate);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+function addFretboardOutput(){
+    // Container <div> where dynamic content will be placed
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Fretboard output: "));
+    app.appendChild(document.createElement("br"));
+    var fretboardOutput = document.createElement("pre");
+    fretboardOutput.id = "fretboard";
+    app.appendChild(fretboardOutput);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
+addOutputArgs()
+addButtons()
+addFretboardOutput()
 
 },{"ansi-to-html":2}],2:[function(require,module,exports){
 "use strict";
