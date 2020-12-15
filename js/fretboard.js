@@ -577,7 +577,7 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(true, false))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
+        return this.preludeStr() + frets[0] + ffs + frets.slice(1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     notesWithIndexStr(start, end) {
@@ -590,7 +590,7 @@ class GuitarString {
             }
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
+        return this.preludeStr() + frets[0] + ffs + frets.slice(1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     indexStr(start, end) {
@@ -599,7 +599,7 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(false, true))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
+        return this.preludeStr() + frets[0] + ffs + frets.slice(1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     fullStr(start, end, indexOnly=false) {
@@ -608,7 +608,7 @@ class GuitarString {
             frets.push(this.frets[i].fullStr(true, true, indexOnly))
         }
         var ffs = this.fretSep(start)
-        return this.preludeStr() + frets[0] + ffs + frets.slice(start+1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
+        return this.preludeStr() + frets[0] + ffs + frets.slice(1).join(this.fretSep(1)) + this.fretSep(1) + '   ' + reset_code
     }
 
     preludeStr() { return `${new Color()}${padString('<', ' ', 5, this.root.toString())} -` }
@@ -971,7 +971,7 @@ function addFrets() {
     var input = document.createElement("select");
     input.name = "frets";
     input.id = "frets";
-    for (var i = 1; i <=24; i++) {
+    for (var i = 1; i <=25; i++) {
         var option = document.createElement("option");
         option.value = i;
         option.text = i;
@@ -1062,7 +1062,7 @@ function generateFretboards() {
     args.end = parseInt(document.getElementById('end').value)
 
     args.scale.root = 'A'
-    args.scale.name = ['major', 'aeolian']
+    args.scale.name = ['major', 'ionian']
     //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
     //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
     args.colors[1] = ['red', 'white']
@@ -1072,13 +1072,12 @@ function generateFretboards() {
     args.inlay.color = [default_fg, '']
     args.scale.subset = [1, 3, 5]
     args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
-    end = args.end == null ? args.frets : args.end
     fretboards = getFretboardsWithName(args)
     for (i in fretboards) {
         var name = fretboards[i][0]
         var fretboard = fretboards[i][1]
         data += reset_code + name +'\n'
-        data += fretboard.str(args.start, end, args.print_notes, args.print_numbers) +'\n'
+        data += fretboard.str(args.start, args.end, args.print_notes, args.print_numbers) +'\n'
     }
     document.getElementById('fretboard').innerHTML = convert.toHtml(data)
 }
