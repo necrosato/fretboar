@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/necrosato/fretboard/issues"
   },
-  "homepage": "https://github.com/necrosato/fretboard#readme"
+  "homepage": "https://github.com/necrosato/fretboard#readme",
+  "dependencies": {
+    "ansi-to-html": "^0.6.14"
+  }
 }
