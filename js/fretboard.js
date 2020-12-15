@@ -59,7 +59,7 @@ bg_colors = {
 reset_code = '\u001b[0m'
 
 default_fg = 'white'
-default_bg = 'red'
+default_bg = 'black'
 
 class Color {
     constructor(fg=default_fg, bg=default_bg) {
@@ -884,9 +884,9 @@ function test() {
     var testStr = ''
     args = JSON.parse(JSON.stringify(default_args))
     args.scale.root = 'A'
-    //args.scale.name = ['major', 'ionian']
+    args.scale.name = ['major', 'aeolian']
     //args.scale.chromatic_formula = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
-    args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
+    //args.scale.major_formula = ['1', '2', '3', '4', '5', '6', '7']
     args.colors[1] = ['red', 'white']
     args.colors[3] = [default_fg, 'light-grey']
     args.colors[5] = [default_fg, 'grey']
@@ -912,4 +912,11 @@ function test() {
  */
 
 
+var Convert = require('ansi-to-html');
+var convert = new Convert();
+ 
+function testAnsiToHtml() {
+  document.getElementById('fretboard').innerHTML = convert.toHtml(test())
+}
 
+testAnsiToHtml()
