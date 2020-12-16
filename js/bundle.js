@@ -906,8 +906,8 @@ default_scale = {
     'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
     'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
     'name': ['major', 'ionian'],
-    'subset': '',
-    'intervals': [] 
+    'subset': [1, 3, 5],
+    'intervals': [1, 2, 3, 4, 5, 6, 7] 
 }
 
 function test() {
@@ -1142,8 +1142,11 @@ function generateFretboards() {
 
     args.inlay.pattern = '*'
     args.inlay.color = [default_fg, '']
-    args.scale.subset = [1, 3, 5]
-    args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
+    subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
+    intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
+    args.scale.subset = subset.map(numStr => parseInt(numStr))
+    args.scale.intervals = intervals.map(numStr => parseInt(numStr))
+    console.log(args)
     fretboards = getFretboardsWithName(args)
     for (i in fretboards) {
         var name = fretboards[i][0]
@@ -1285,11 +1288,34 @@ function addScaleName() {
     setModeBox()
 }
 
+function addSubsets() {
+    var app = document.getElementById("app");
+    // Create an <input> element, set its type and name attributes
+    var subset = document.createElement("input");
+    var intervals = document.createElement("input");
+    subset.type = "text";
+    subset.name = "subset";
+    subset.id = "subset";
+    subset.defaultValue = default_scale.subset.join(' ')
+    intervals.type = "text";
+    intervals.name = "intervals";
+    intervals.id = "intervals";
+    intervals.defaultValue = default_scale.intervals.join(' ')
+    app.appendChild(document.createTextNode("Subset: "));
+    app.appendChild(subset);
+    app.appendChild(document.createTextNode("Intervals: "));
+    app.appendChild(intervals);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+
+}
+
 function addScaleSelection() {
     addRoot()
     addChromaticFormula()
     addMajorFormula()
     addScaleName()
+    addSubsets()
 }
 
 addOutputArgs()
