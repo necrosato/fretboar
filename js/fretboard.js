@@ -77,6 +77,9 @@ bg_colors = {
         }
 
 reset_code = '\u001b[0m'
+bold_code = '\u001b[1m'
+overline_code = '\u001b[53m'
+no_overline_code = '\u001b[55m'
 
 default_fg = 'white'
 default_bg = 'black'
@@ -704,21 +707,21 @@ class Fretboard {
         var legend, lines, slines, spaces
         [legend, lines, slines, spaces] = this.border(start, end)
         data = data.reverse().join('\n' + slines + '\n')
-        return new Color() + legend + '\n' + lines + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + spaces + '\n' + legend + reset_code +'\n'
+        return legend + '\n' + spaces + '\n' + data + '\n' + lines + '\n' + legend + reset_code +'\n'
     }
 
 
     border(start, end) {
         var frets = []
-        for (var i = start; i<end; i++) { frets.push(padString('^', ' ', 10, i.toString())) }
-        var legend = `Fret:     ` + frets.join('')
+        for (var i = start; i<end; i++) { frets.push(padString('<', ' ', 10, i.toString())) }
+        var legend = `Fret:      ` + frets.join('')
         var lines = '_'.repeat(legend.length)
         var slines = '-'.repeat(legend.length)
         var spaces = ' '.repeat(legend.length)
-        return [ reset_code + legend + reset_code,
+        return [ reset_code + bold_code + legend + reset_code,
                 new Color() + lines + reset_code,
                 new Color() + slines + reset_code,
-                new Color() + spaces + reset_code]
+                new Color() + overline_code + spaces + reset_code]
     }
 
     str(start, end, notes, index) {
@@ -1074,7 +1077,7 @@ function addPrintNotes() {
 
 function addColor(i) {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode(`Note ${i} color [foreground, background]: `));
+    app.appendChild(document.createTextNode(`Note ${i}: `));
     // Create an <input> element, set its type and name attributes
     var fgin = document.createElement("select");
     var bgin = document.createElement("select");
@@ -1100,6 +1103,13 @@ function addColor(i) {
     app.appendChild(document.createElement("br"));
 }
 
+function addColors() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval: `));
+    app.appendChild(document.createElement("br"));
+    for (var i = 0; i <= 12; i++) { addColor(i) }
+}
+
 function addOutputArgs() {
     addTuning()
     addFrets()
@@ -1107,7 +1117,7 @@ function addOutputArgs() {
     addEnd()
     addPrintNumbers()
     addPrintNotes()
-    for (i = 0; i <= 12; i++) { addColor(i) }
+    addColors()
 }
 
 function generateFretboards() {
