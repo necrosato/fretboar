@@ -1119,7 +1119,7 @@ function generateFretboards() {
     args.print_numbers = document.getElementById('print_numbers').checked
     args.print_notes = document.getElementById('print_notes').checked
 
-    for (i = 0; i <= 12; i++) {
+    for (i = 0; i <= 10; i++) {
         var fg_color = document.getElementById(`color_fg_${i}`).value
         var bg_color = document.getElementById(`color_bg_${i}`).value
         args.colors[i] = [fg_color, bg_color]
