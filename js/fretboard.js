@@ -136,9 +136,9 @@ class Inlays {
     }
 }
 
-standardInlayFrets = [1, 3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
+standardInlayFrets = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
 topFrets = [12, 15, 17, 19, 21, 24]
-bottomFrets = [1, 3, 5, 7, 9, 12]
+bottomFrets = [3, 5, 7, 9, 12]
 doubleDotFrets = [12, 24]
 
 function inlaysFromFrets(frets, inlay) {
