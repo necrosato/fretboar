@@ -84,6 +84,8 @@ no_overline_code = '\u001b[55m'
 
 default_fg = 'white'
 default_bg = 'black'
+default_note_fg = 'black'
+default_note_bg = 'light-grey'
 
 class Color {
     constructor(fg=default_fg, bg=default_bg) {
@@ -416,6 +418,7 @@ iwatoFormula = ['1', 'b2', '4', 'b5', 'b7']
 yoFormula = ['1', '2', '4', '5', '6']
 hirajoshiFormula = ['1', '2', 'b3', '5', 'b6']
 ryukyuFormula = ['1', '3', '4', '5', '7']
+doubleHarmonicMinorFormula = ['1', 'b2', '3', '4', '5', 'b6', '7']
 
 function addMode(scale, name, chromatic, num) {
     scales[scale][name] = new Mode(name, chromatic, num)
@@ -494,6 +497,7 @@ addAllModesMajorFormula('iwato', iwatoFormula)
 addAllModesMajorFormula('yo', yoFormula)
 addAllModesMajorFormula('hirajoshi', hirajoshiFormula)
 addAllModesMajorFormula('ryukyu', ryukyuFormula)
+addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 
 function logScales() {
     console.log('Available scales:')
@@ -800,7 +804,7 @@ function setFromScaleName(fretboard, scale, mode, root, colors) {
     return fretboard
 }
 
-function intervalSubsets(fretboard, subsetBase, intervals, colors) {
+function intervalSubsets(fretboard, subsetBase, intervals, colors, recolor) {
     var distances = []
     for (var i = 1; i < subsetBase.length; i++) {
         distances.push(subsetBase[i] - subsetBase[i-1])
@@ -819,7 +823,11 @@ function intervalSubsets(fretboard, subsetBase, intervals, colors) {
         intervalColors = {}
         for (var j = 0; j < subset.length; j++) {
             if (subsetBase[j] in colors) {
-                intervalColors[subset[j]] = colors[subsetBase[j]]
+                if (recolor) {
+                    intervalColors[subset[j]] = colors[subsetBase[j]]
+                } else {
+                    intervalColors[subset[j]] = colors[subset[j]]
+                }
             }
         }
         subsets.push([subset, fretboard.scaleSubset(subset, intervalColors)])
@@ -849,7 +857,7 @@ function getFretboardsWithName(args) {
         fretboards.push([`Mode Name ${args.scale.name}`, fretboard])
     }
     if (args.scale.subset && args.scale.intervals) {
-        var subsets = intervalSubsets(fretboard, args.scale.subset, args.scale.intervals, colors)
+        var subsets = intervalSubsets(fretboard, args.scale.subset, args.scale.intervals, colors, args.recolor_intervals)
         for (i in subsets) {
             var intervals = subsets[i][0]
             var subset = subsets[i][1]
@@ -876,19 +884,19 @@ var default_args = {
     'print_numbers': true,
     
     'colors': {
-        0: [default_fg, default_bg],
-        1: [default_fg, default_bg],
-        2: [default_fg, default_bg],
-        3: [default_fg, default_bg],
-        4: [default_fg, default_bg],
-        5: [default_fg, default_bg],
-        6: [default_fg, default_bg],
-        7: [default_fg, default_bg],
-        8: [default_fg, default_bg],
-        9: [default_fg, default_bg],
-       10: [default_fg, default_bg],
-       11: [default_fg, default_bg],
-       12: [default_fg, default_bg]
+        0: [default_note_fg, default_note_bg],
+        1: [default_note_fg, default_note_bg],
+        2: [default_note_fg, default_note_bg],
+        3: [default_note_fg, default_note_bg],
+        4: [default_note_fg, default_note_bg],
+        5: [default_note_fg, default_note_bg],
+        6: [default_note_fg, default_note_bg],
+        7: [default_note_fg, default_note_bg],
+        8: [default_note_fg, default_note_bg],
+        9: [default_note_fg, default_note_bg],
+       10: [default_note_fg, default_note_bg],
+       11: [default_note_fg, default_note_bg],
+       12: [default_note_fg, default_note_bg]
     },
     'scale': {
         'root': null,
@@ -896,7 +904,8 @@ var default_args = {
         'chromatic_formula': null,
         'name': null,
         'subset': null,
-        'intervals': null
+        'intervals': null,
+        'recolor_intervals': false 
     },
     'inlay': {
         'pattern': null,
@@ -1076,7 +1085,7 @@ function addPrintNotes() {
     app.appendChild(document.createElement("br"));
 }
 
-function addColor(i) {
+function addColor(i, fg, bg) {
     var app = document.getElementById("app");
     app.appendChild(document.createTextNode(`Note ${i}: `));
     // Create an <input> element, set its type and name attributes
@@ -1096,8 +1105,8 @@ function addColor(i) {
         fgin.appendChild(fg_option);
         bgin.appendChild(bg_option);
     }
-    fgin.value = default_fg
-    bgin.value = default_bg
+    fgin.value = fg
+    bgin.value = bg
     app.appendChild(fgin);
     app.appendChild(bgin);
     // Append a line break
@@ -1108,7 +1117,11 @@ function addColors() {
     var app = document.getElementById("app");
     app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval: `));
     app.appendChild(document.createElement("br"));
-    for (var i = 0; i <= 12; i++) { addColor(i) }
+    for (var i = 0; i <= 12; i++) {
+      var fg = i == 0 ? default_fg : default_note_fg
+      var bg = i == 0 ? default_bg : default_note_bg
+      addColor(i, fg, bg)
+    }
 }
 
 function addOutputArgs() {
@@ -1154,8 +1167,10 @@ function generateFretboards() {
     args.inlay.color = [default_fg, '']
     subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
     intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
+    recolor_intervals = document.getElementById('recolor_intervals').checked
     args.scale.subset = subset.map(numStr => parseInt(numStr))
     args.scale.intervals = intervals.map(numStr => parseInt(numStr))
+    args.recolor_intervals = recolor_intervals
     console.log(args)
     fretboards = getFretboardsWithName(args)
     for (i in fretboards) {
@@ -1320,12 +1335,26 @@ function addSubsets() {
 
 }
 
+function addRecolorSubsets() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Recolor Intervals: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "checkbox"
+    input.id = "recolor_intervals";
+    input.checked = true
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
 function addScaleSelection() {
     addRoot()
     addChromaticFormula()
     addMajorFormula()
     addScaleName()
     addSubsets()
+    addRecolorSubsets()
 }
 
 addOutputArgs()
