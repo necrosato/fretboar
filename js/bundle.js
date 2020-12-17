@@ -407,6 +407,7 @@ class Mode {
 
 scales = {}
 pentatonicBase = new ChromaticScale([1, 0, 2, 0, 3, 0, 0, 4, 0, 5, 0, 0])
+bluesBase = new ChromaticScale([1, 0, 2, 3, 4, 0, 0, 5, 0, 6, 0, 0])
 majorBase = new ChromaticScale([1, 0, 2, 0, 3, 4, 0, 5, 0, 6, 0, 7])
 harmonicMinorBase = new ChromaticScale([1, 0, 2, 3, 0, 4, 0, 5, 6, 0, 0, 7])
 melodicMinorBase = new ChromaticScale([1, 0, 2, 3, 0, 4, 0, 5, 0, 6, 0, 7])
@@ -487,8 +488,10 @@ addScale('major',
 
 addAllModes('major', majorBase)
 addAllModes('pentatonic', pentatonicBase)
+addAllModes('blues', bluesBase)
 addAllModes('harmonic_minor', harmonicMinorBase)
 addAllModes('melodic_minor', melodicMinorBase)
+addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 addAllModes('diminished', diminishedBase)
 addAllModes('whole_tone', wholeToneBase)
 addAllModesMajorFormula('in', inFormula)
@@ -497,7 +500,6 @@ addAllModesMajorFormula('iwato', iwatoFormula)
 addAllModesMajorFormula('yo', yoFormula)
 addAllModesMajorFormula('hirajoshi', hirajoshiFormula)
 addAllModesMajorFormula('ryukyu', ryukyuFormula)
-addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 
 function logScales() {
     console.log('Available scales:')
