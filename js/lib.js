@@ -388,7 +388,7 @@ no_overline_code = '\u001b[55m'
 default_fg = 'white'
 default_bg = 'black'
 default_note_fg = 'black'
-default_note_bg = 'white'
+default_note_bg = 'light-grey'
 
 class Color {
     constructor(fg=default_fg, bg=default_bg) {
@@ -802,24 +802,24 @@ function addAllModesMajorFormula(scale, formula) {
 }
 
 addScale('major',
-        ['ionian',
-         'dorian',
-         'phrygian',
-         'lydian',
-         'mixolydian',
-         'aeolian',
-         'locrian'
+        ['ionian (1)',
+         'dorian (2)',
+         'phrygian (3)',
+         'lydian (4)',
+         'mixolydian (5)',
+         'aeolian (6)',
+         'locrian (7)'
          ], majorBase)
 
 
-addAllModes('major', majorBase)
-addAllModes('pentatonic', pentatonicBase)
-addAllModes('blues', bluesBase)
+//addAllModes('major', majorBase)
 addAllModes('harmonic_minor', harmonicMinorBase)
 addAllModes('melodic_minor', melodicMinorBase)
 addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 addAllModes('diminished', diminishedBase)
 addAllModes('whole_tone', wholeToneBase)
+addAllModes('pentatonic', pentatonicBase)
+addAllModes('blues', bluesBase)
 addAllModesMajorFormula('in', inFormula)
 addAllModesMajorFormula('insen', insenFormula)
 addAllModesMajorFormula('iwato', iwatoFormula)
@@ -1195,13 +1195,24 @@ function addChromaticFormula() {
     check.type = "radio"
     check.name = "scale_selector";
     check.id = "chromatic_selector";
-    check.checked = true
+    check.checked = false
+    check.onclick = function() {
+      chrombox = document.getElementById('chromatic_formula');
+      chrombox.style.display='';
+      scalebox = document.getElementById('major_formula');
+      scalebox.style.display='none';
+      snamebox = document.getElementById('scale_name_select');
+      mnamebox = document.getElementById('mode_name_select');
+      snamebox.style.display='none';
+      mnamebox.style.display='none';
+    };
 
     var input = document.createElement("input");
     input.type = "text"
     input.name = "chromatic_formula";
     input.id = "chromatic_formula";
     input.value = default_scale.chromatic_formula.join(' ')
+    input.style.display='none'
 
     app.appendChild(check);
     app.appendChild(input);
@@ -1218,12 +1229,23 @@ function addMajorFormula() {
     check.name = "scale_selector";
     check.id = "major_selector";
     check.checked = false 
+    check.onclick = function() {
+      chrombox = document.getElementById('chromatic_formula');
+      chrombox.style.display='none';
+      scalebox = document.getElementById('major_formula');
+      scalebox.style.display='';
+      snamebox = document.getElementById('scale_name_select');
+      mnamebox = document.getElementById('mode_name_select');
+      snamebox.style.display='none';
+      mnamebox.style.display='none';
+    };
 
     var input = document.createElement("input");
     input.type = "text"
     input.name = "major_formula";
     input.id = "major_formula";
     input.value = default_scale.major_formula.join(' ')
+    input.style.display='none'
 
     app.appendChild(check);
     app.appendChild(input);
@@ -1262,8 +1284,17 @@ function addScaleName() {
     check.type = "radio"
     check.name = "scale_selector";
     check.id = "scale_name_selector";
-    check.checked = false
-
+    check.checked = true
+    check.onclick = function() {
+      chrombox = document.getElementById('chromatic_formula');
+      chrombox.style.display='none';
+      scalebox = document.getElementById('major_formula');
+      scalebox.style.display='none';
+      snamebox = document.getElementById('scale_name_select');
+      mnamebox = document.getElementById('mode_name_select');
+      snamebox.style.display='';
+      mnamebox.style.display='';
+    };
     var scaleBox = document.createElement("select");
     var modeBox = document.createElement("select");
     scaleBox.name = `scale_name_select`;

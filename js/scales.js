@@ -283,24 +283,24 @@ function addAllModesMajorFormula(scale, formula) {
 }
 
 addScale('major',
-        ['ionian',
-         'dorian',
-         'phrygian',
-         'lydian',
-         'mixolydian',
-         'aeolian',
-         'locrian'
+        ['ionian (1)',
+         'dorian (2)',
+         'phrygian (3)',
+         'lydian (4)',
+         'mixolydian (5)',
+         'aeolian (6)',
+         'locrian (7)'
          ], majorBase)
 
 
-addAllModes('major', majorBase)
-addAllModes('pentatonic', pentatonicBase)
-addAllModes('blues', bluesBase)
+//addAllModes('major', majorBase)
 addAllModes('harmonic_minor', harmonicMinorBase)
 addAllModes('melodic_minor', melodicMinorBase)
 addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 addAllModes('diminished', diminishedBase)
 addAllModes('whole_tone', wholeToneBase)
+addAllModes('pentatonic', pentatonicBase)
+addAllModes('blues', bluesBase)
 addAllModesMajorFormula('in', inFormula)
 addAllModesMajorFormula('insen', insenFormula)
 addAllModesMajorFormula('iwato', iwatoFormula)
