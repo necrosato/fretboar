@@ -813,13 +813,13 @@ addScale('major',
 
 
 //addAllModes('major', majorBase)
-addAllModes('pentatonic', pentatonicBase)
-addAllModes('blues', bluesBase)
 addAllModes('harmonic_minor', harmonicMinorBase)
 addAllModes('melodic_minor', melodicMinorBase)
 addAllModesMajorFormula('double_harmonic_minor', doubleHarmonicMinorFormula)
 addAllModes('diminished', diminishedBase)
 addAllModes('whole_tone', wholeToneBase)
+addAllModes('pentatonic', pentatonicBase)
+addAllModes('blues', bluesBase)
 addAllModesMajorFormula('in', inFormula)
 addAllModesMajorFormula('insen', insenFormula)
 addAllModesMajorFormula('iwato', iwatoFormula)
