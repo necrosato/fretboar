@@ -36,7 +36,7 @@ class Note {
 
     offset(other) {
         // returns a positive offsetUp if other is above else returns a negative offset down // 
-        if (this.val < other.val) {
+        if (this.val <= other.val) {
             return this.offsetUp(other)
         }
         return this.offsetDown(other) * -1
@@ -44,8 +44,8 @@ class Note {
 
     offsetUp(other) {
         // return the number of semitones to move from this note up to other // 
-        if (this.val < other.val) {
-            return other.offsetDown(this)
+        if (this.val > other.val) {
+            return 12 - other.offsetUp(this)
         }
         return (other.val - this.val) % 12
     }
@@ -53,7 +53,7 @@ class Note {
     offsetDown(other) {
         // return the number of semitones to move from this note down to other // 
         if (this.val < other.val) {
-            return other.offsetUp(this)
+            return 12 - other.offsetDown(this)
         }
         return (this.val - other.val) % 12
     }
