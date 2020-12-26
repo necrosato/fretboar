@@ -4,7 +4,6 @@ function pianotrollSite() {
  */
 
 var default_args = {
-    'tuning': ['E', 'A', 'D', 'G', 'B', 'E'],
     'keys': 88,
     'start': 0,
     'end': null,
@@ -56,7 +55,7 @@ function test() {
     args.scale.subset = [1, 3, 5]
     args.scale.intervals = [1, 2, 3, 4, 5, 6, 7]
     end = args.end == null ? args.keys : args.end
-    fretboards = getFretboardsWithName(args)
+    fretboards = getKeyboardsWithName(args)
     for (i in fretboards) {
         var name = fretboards[i][0]
         var fretboard = fretboards[i][1]
@@ -86,23 +85,9 @@ function clearSelect(select) {
     }
 }
 
-function addTuning() {
+function addKeys() {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode("String Tunings: "));
-    // Create an <input> element, set its type and name attributes
-    var input = document.createElement("input");
-    input.type = "text";
-    input.name = "tuning";
-    input.id = "tuning";
-    input.defaultValue = default_args.tuning.join(' ')
-    app.appendChild(input);
-    // Append a line break
-    app.appendChild(document.createElement("br"));
-}
-
-function addFrets() {
-    var app = document.getElementById("app");
-    app.appendChild(document.createTextNode("Frets: "));
+    app.appendChild(document.createTextNode("Keys: "));
     // Create an <input> element, set its type and name attributes
     var input = document.createElement("select");
     input.name = "keys";
@@ -114,13 +99,13 @@ function addFrets() {
         input.appendChild(option);
     }
     input.selectedIndex= default_args.keys-1
-    input.onchange = setStartEndFromFrets
+    input.onchange = setStartEndFromKeys
     app.appendChild(input);
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
 
-function setStartFromFrets() {
+function setStartFromKeys() {
     start = document.getElementById('start')
     oldStart = start.selectedIndex < 0 ? 0 : start.selectedIndex
     clearSelect(start)
@@ -134,7 +119,7 @@ function setStartFromFrets() {
     start.selectedIndex = oldStart > maxStart ? maxStart : oldStart
 }
 
-function setEndFromFrets() {
+function setEndFromKeys() {
     end = document.getElementById('end')
     var maxEnd = document.getElementById('keys').value
     var minEnd = parseInt(document.getElementById('start').value) + 1
@@ -148,34 +133,34 @@ function setEndFromFrets() {
     end.selectedIndex = maxEnd-minEnd
 }
 
-function setStartEndFromFrets() {
-    setStartFromFrets()
-    setEndFromFrets()
+function setStartEndFromKeys() {
+    setStartFromKeys()
+    setEndFromKeys()
 }
 
 function addStart() {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode("Start Fret: "));
+    app.appendChild(document.createTextNode("Start Key: "));
     // Create an <input> element, set its type and name attributes
     var input = document.createElement("select");
     input.name = "start";
     input.id = "start";
-    input.onchange = setEndFromFrets
+    input.onchange = setEndFromKeys
     app.appendChild(input);
-    setStartFromFrets()
+    setStartFromKeys()
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
 
 function addEnd() {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode("End Fret: "));
+    app.appendChild(document.createTextNode("End Key: "));
     // Create an <input> element, set its type and name attributes
     var input = document.createElement("select");
     input.name = "end";
     input.id = "end";
     app.appendChild(input);
-    setEndFromFrets()
+    setEndFromKeys()
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
@@ -245,8 +230,7 @@ function addColors() {
 }
 
 function addOutputArgs() {
-    addTuning()
-    addFrets()
+    addKeys()
     addStart()
     addEnd()
     addPrintNumbers()
@@ -254,10 +238,9 @@ function addOutputArgs() {
     addColors()
 }
 
-function generateFretboards() {
+function generateKeyboards() {
     var data = ''
     args = JSON.parse(JSON.stringify(default_args))
-    args.tuning = removeItemAll(document.getElementById('tuning').value.split(' '), '')
     args.keys = parseInt(document.getElementById('keys').value)
     args.start = parseInt(document.getElementById('start').value)
     args.end = parseInt(document.getElementById('end').value)
@@ -305,16 +288,16 @@ function addButtons(){
     var generate = document.createElement("button");
     generate.id = 'generate';
     generate.textContent = 'Generate';
-    generate.onclick = generateFretboards;
+    generate.onclick = generateKeyboards;
     app.appendChild(generate);
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
 
-function addFretboardOutput(){
+function addKeyboardOutput(){
     // Container <div> where dynamic content will be placed
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode("Fretboard output: "));
+    app.appendChild(document.createTextNode("Keyboard output: "));
     app.appendChild(document.createElement("br"));
     var fretboardOutput = document.createElement("pre");
     fretboardOutput.id = "fretboard";
@@ -509,6 +492,6 @@ function addScaleSelection() {
 addOutputArgs()
 addScaleSelection()
 addButtons()
-addFretboardOutput()
+addKeyboardOutput()
 
 }
