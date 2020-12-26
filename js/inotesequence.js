@@ -140,7 +140,7 @@ class BlackKeys extends INoteSequence {
         for (var i = start; i < end; i++) {
             notes.push(this.notes[i].fullStr(printNoteLetters, printNoteNumbers, posIndexOnly))
             if (this.sequence[i % this.sequence.length] == 3) {
-                notes.push(wkeycol() + '     |     ');
+                notes.push(bkeycol() + ' ' + wkeycol() + '    |    ' + bkeycol() + ' ');
             } else {
                 notes[notes.length-1] += bkeycol() + '|'
             }

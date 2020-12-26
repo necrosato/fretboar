@@ -69,8 +69,6 @@ class Keyboard {
 
     scaleSubset(indices, wcolors, bcolors) {
         var k = new Keyboard(this.keyNum)
-        console.log(wcolors)
-        console.log(bcolors)
         k.whites = this.whites.scaleSubset(indices, wcolors)
         k.blacks = this.blacks.scaleSubset(indices, bcolors)
         return k

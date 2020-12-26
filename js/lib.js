@@ -244,8 +244,6 @@ class Keyboard {
 
     scaleSubset(indices, wcolors, bcolors) {
         var k = new Keyboard(this.keyNum)
-        console.log(wcolors)
-        console.log(bcolors)
         k.whites = this.whites.scaleSubset(indices, wcolors)
         k.blacks = this.blacks.scaleSubset(indices, bcolors)
         return k
@@ -1027,7 +1025,7 @@ class BlackKeys extends INoteSequence {
         for (var i = start; i < end; i++) {
             notes.push(this.notes[i].fullStr(printNoteLetters, printNoteNumbers, posIndexOnly))
             if (this.sequence[i % this.sequence.length] == 3) {
-                notes.push(wkeycol() + '     |     ');
+                notes.push(bkeycol() + ' ' + wkeycol() + '    |    ' + bkeycol() + ' ');
             } else {
                 notes[notes.length-1] += bkeycol() + '|'
             }
