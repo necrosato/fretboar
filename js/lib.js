@@ -2080,13 +2080,15 @@ addButtons()
 addFretboardOutput()
 
 }
-if (window.location.href == "www.fretboar.com")
+if (window.location.href.includes("fretboar.com"))
 {
   fretboarSite()
+}
+else if (window.location.href.includes("pianotroll.com"))
+{
+  pianotrollSite()
 }
 else 
 {
-  fretboarSite()
-  //pianotrollSite()
+  pianotrollSite()
 }
-console.log(window.location.href)

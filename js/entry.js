@@ -1,8 +1,8 @@
-if (window.location.href.includes("fretboar.com")
+if (window.location.href.includes("fretboar.com"))
 {
   fretboarSite()
 }
-else if (window.location.href.includes("pianotroll.com")
+else if (window.location.href.includes("pianotroll.com"))
 {
   pianotrollSite()
 }
@@ -10,4 +10,3 @@ else
 {
   pianotrollSite()
 }
-console.log(window.location.href)
