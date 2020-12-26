@@ -1,4 +1,4 @@
-colors = {
+fg_colors = {
         'black'       : '\u001b[30m',
         'red'         : '\u001b[31m',
         'green'       : '\u001b[32m',
@@ -41,6 +41,6 @@ class Color {
         this.bg = bg
     }
     toString() {
-        return colors[this.fg] + bg_colors[this.bg]
+        return fg_colors[this.fg] + bg_colors[this.bg]
     }
 }

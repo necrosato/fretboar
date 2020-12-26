@@ -11,34 +11,34 @@ class Inlay {
 }
 
 class Inlays {
-    constructor(frets) {
-        //  frets is map of fret num to Inlay // 
-        this.frets = frets
+    constructor(notes) {
+        //  notes is map of fret num to Inlay // 
+        this.notes = notes
     }
 
     setColor(color) {
         //  set same color for all inlays // 
-        for (var i in this.frets) {
-            this.frets[i].color = color
+        for (var i in this.notes) {
+            this.notes[i].color = color
         }
     }
 
     setChar(design) {
         //  set same design for all inlays // 
-        for (var i in this.frets) {
-            this.frets[i].design = design
+        for (var i in this.notes) {
+            this.notes[i].design = design
         }
     }
 }
 
-standardInlayFrets = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
-topFrets = [12, 15, 17, 19, 21, 24]
-bottomFrets = [3, 5, 7, 9, 12]
-doubleDotFrets = [12, 24]
+standardInlayNotes = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
+topNotes = [12, 15, 17, 19, 21, 24]
+bottomNotes = [3, 5, 7, 9, 12]
+doubleDotNotes = [12, 24]
 
-function inlaysFromFrets(frets, inlay) {
+function inlaysFromNotes(notes, inlay) {
     inlays = {}
-    for (f in frets) {
+    for (f in notes) {
       inlays[f] = inlay
     }
     return new Inlays(inlays)
@@ -55,7 +55,7 @@ function dotInlays(color, fretNums, design=null) {
     var inlays = {}
     fretNums.forEach(function(i) {
         if (design==null) {
-            inlays[i] = new Inlay(color, doubleDotFrets.includes(i) ? ':' : '.')
+            inlays[i] = new Inlay(color, doubleDotNotes.includes(i) ? ':' : '.')
         } else {
             inlays[i] = new Inlay(color, design)
         }
@@ -64,18 +64,18 @@ function dotInlays(color, fretNums, design=null) {
 }
 
 function dotsOnFirstString(color, design=null) {
-    firstStringInlays = dotInlays(color, standardInlayFrets, design)
+    firstStringInlays = dotInlays(color, standardInlayNotes, design)
     return new InlayPattern({'0': firstStringInlays})
 }
 
 function dotsOnLastString(color, design=null) {
-    lastStringInlays = dotInlays(color, standardInlayFrets, design)
+    lastStringInlays = dotInlays(color, standardInlayNotes, design)
     return new InlayPattern({'-1': lastStringInlays})
 }
 
 function splitTopBottomDots(color, design=null) {
-    firstStringInlays = dotInlays(color, bottomFrets, design)
-    lastStringInlays = dotInlays(color, topFrets, design)
+    firstStringInlays = dotInlays(color, bottomNotes, design)
+    lastStringInlays = dotInlays(color, topNotes, design)
     return new InlayPattern({'0': firstStringInlays, '-1': lastStringInlays})
 }
 
