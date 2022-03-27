@@ -1801,8 +1801,7 @@ else if (window.location.href.includes("pianotroll.com"))
 }
 else 
 {
-  pianotrollSite()
-  //fretboarSite()
+  fretboarSite()
 }
 
 },{"ansi-to-html":2}],2:[function(require,module,exports){
