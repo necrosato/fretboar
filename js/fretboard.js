@@ -142,25 +142,20 @@ class Fretboard {
 
 function getFretboardsWithName(args) {
     var fretboards = []
-    var colors = {}
-    for (i in args.colors) {
-        colors[i] = new Color(args.colors[i][0], args.colors[i][1])
-    }
     end = args.end == null ? args.frets : args.end
-    inlayColor = new Color(args.inlay.color[0], args.inlay.color[1])
-    fretboard = new Fretboard(args.tuning, args.frets, splitTopBottomDots(inlayColor, args.inlay.pattern))
+    fretboard = new Fretboard(args.tuning, args.frets, splitTopBottomDots(args.inlay.color, args.inlay.pattern))
 
     if (args.scale.major_formula != null) {
         fretboard.setMajorFormula(args.scale.major_formula, args.scale.root)
-        fretboard.setColors(colors)
+        fretboard.setColors(args.colors)
         fretboards.push([`Major Relative Scale Formula ${args.scale.major_formula}`, fretboard])
     } else if (args.scale.chromatic_formula != null) {
         fretboard.setChromaticFormula(args.scale.chromatic_formula, args.scale.root)
-        fretboard.setColors(colors)
+        fretboard.setColors(args.colors)
         fretboards.push([`Chromatic Binary Scale Formula ${args.scale.chromatic_formula}`, fretboard])
     } else if (args.scale.name != null) {
-        fretboard.setFromScaleName(args.scale.name[0], args.scale.name[1], args.scale.root, colors)
-        fretboard.setColors(colors)
+        fretboard.setFromScaleName(args.scale.name[0], args.scale.name[1], args.scale.root, args.colors)
+        fretboard.setColors(args.colors)
         fretboards.push([`Mode Name ${args.scale.name}`, fretboard])
     }
     if (args.scale.subset && args.scale.intervals) {

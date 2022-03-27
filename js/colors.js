@@ -44,3 +44,51 @@ class Color {
         return fg_colors[this.fg] + bg_colors[this.bg]
     }
 }
+
+color_presets = {
+  'default': {
+      0: new Color(default_fg, default_bg),
+      1: new Color(default_note_fg, default_note_bg),
+      2: new Color(default_note_fg, default_note_bg),
+      3: new Color(default_note_fg, default_note_bg),
+      4: new Color(default_note_fg, default_note_bg),
+      5: new Color(default_note_fg, default_note_bg),
+      6: new Color(default_note_fg, default_note_bg),
+      7: new Color(default_note_fg, default_note_bg),
+      8: new Color(default_note_fg, default_note_bg),
+      9: new Color(default_note_fg, default_note_bg),
+     10: new Color(default_note_fg, default_note_bg),
+     11: new Color(default_note_fg, default_note_bg),
+     12: new Color(default_note_fg, default_note_bg)
+  },
+  'empty': {
+      0: new Color('', ''),
+      1: new Color('', ''),
+      2: new Color('', ''),
+      3: new Color('', ''),
+      4: new Color('', ''),
+      5: new Color('', ''),
+      6: new Color('', ''),
+      7: new Color('', ''),
+      8: new Color('', ''),
+      9: new Color('', ''),
+     10: new Color('', ''),
+     11: new Color('', ''),
+     12: new Color('', '')
+  },
+  'unique_bg': {
+      0: new Color(default_fg, default_bg),
+      1: new Color(default_note_fg, 'red'),
+      2: new Color(default_note_fg, 'blue'),
+      3: new Color(default_note_fg, 'grey'),
+      4: new Color(default_note_fg, 'cyan'),
+      5: new Color(default_note_fg, 'light-grey'),
+      6: new Color(default_note_fg, 'green'),
+      7: new Color(default_note_fg, 'white'),
+      8: new Color(default_note_fg, default_note_bg),
+      9: new Color(default_note_fg, default_note_bg),
+     10: new Color(default_note_fg, default_note_bg),
+     11: new Color(default_note_fg, default_note_bg),
+     12: new Color(default_note_fg, default_note_bg)
+  }
+}

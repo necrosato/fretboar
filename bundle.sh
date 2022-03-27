@@ -11,6 +11,7 @@ JS=(
   "$JSDIR/scales.js"
   "$JSDIR/inote.js"
   "$JSDIR/inotesequence.js"
+  "$JSDIR/shared_site.js"
   "$JSDIR/fretboar_site.js"
   "$JSDIR/pianotroll_site.js"
   )
