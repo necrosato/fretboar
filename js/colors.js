@@ -36,6 +36,10 @@ default_note_fg = 'black'
 default_note_bg = 'light-grey'
 
 class Color {
+    static copy( other )
+    {
+        return new Color( other.fg, other.bg );
+    }
     constructor(fg=default_fg, bg=default_bg) {
         this.fg = fg
         this.bg = bg

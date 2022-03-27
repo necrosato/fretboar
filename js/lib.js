@@ -145,25 +145,33 @@ function getFretboardsWithName(args) {
     end = args.end == null ? args.frets : args.end
     fretboard = new Fretboard(args.tuning, args.frets, splitTopBottomDots(args.inlay.color, args.inlay.pattern))
 
+    var s = ''
     if (args.scale.major_formula != null) {
         fretboard.setMajorFormula(args.scale.major_formula, args.scale.root)
         fretboard.setColors(args.colors)
+        s = `${args.scale.major_formula}`
         fretboards.push([`Major Relative Scale Formula ${args.scale.major_formula}`, fretboard])
     } else if (args.scale.chromatic_formula != null) {
         fretboard.setChromaticFormula(args.scale.chromatic_formula, args.scale.root)
         fretboard.setColors(args.colors)
+        s = `${args.scale.chromatic_formula}`
         fretboards.push([`Chromatic Binary Scale Formula ${args.scale.chromatic_formula}`, fretboard])
     } else if (args.scale.name != null) {
         fretboard.setFromScaleName(args.scale.name[0], args.scale.name[1], args.scale.root, args.colors)
         fretboard.setColors(args.colors)
+        s = `${args.scale.name}`
         fretboards.push([`Mode Name ${args.scale.name}`, fretboard])
     }
+    if ( !args.scale.print_full_scale )
+    {
+        fretboards = []
+    }
     if (args.scale.subset && args.scale.intervals) {
-        var subsets = fretboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.recolor_intervals)
+        var subsets = fretboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.scale.recolor_intervals)
         for (i in subsets) {
             var intervals = subsets[i][0]
             var subset = subsets[i][1]
-            fretboards.push([`Interval Subset (${intervals})`, subset])
+            fretboards.push([`${args.scale.root} ${s} Interval Subset (${intervals})`, subset])
         }
     }
     return fretboards
@@ -357,8 +365,12 @@ function getKeyboardsWithName(args) {
         keyboard.setColors(wcolors, bcolors)
         keyboards.push([`Mode Name ${args.scale.name}`, keyboard])
     }
+    if ( !args.scale.print_full_scale )
+    {
+        keyboards = []
+    }
     if (args.scale.subset && args.scale.intervals) {
-        var subsets = keyboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.recolor_intervals)
+        var subsets = keyboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.scale.recolor_intervals)
         for (i in subsets) {
             var intervals = subsets[i][0]
             var subset = subsets[i][1]
@@ -405,6 +417,10 @@ default_note_fg = 'black'
 default_note_bg = 'light-grey'
 
 class Color {
+    static copy( other )
+    {
+        return new Color( other.fg, other.bg );
+    }
     constructor(fg=default_fg, bg=default_bg) {
         this.fg = fg
         this.bg = bg
@@ -1086,6 +1102,15 @@ class BlackKeys extends INoteSequence {
  * BEGIN WEB DISPLAY
  */
 
+default_scale = {
+    'root': 'A',
+    'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+    'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
+    'name': ['major', 'ionian'],
+    'subset': [1, 3, 5],
+    'intervals': [1, 2, 3, 4, 5, 6, 7] 
+}
+
 var Convert = require('ansi-to-html');
 var convert = new Convert();
  
@@ -1185,12 +1210,70 @@ function addPrintNotes() {
     app.appendChild(document.createElement("br"));
 }
 
-function addButtons( clickf ){
+function downloadFiles(data, file_name, file_type) {
+    var file = new Blob([data], {type: file_type});
+    if (window.navigator.msSaveOrOpenBlob) 
+        window.navigator.msSaveOrOpenBlob(file, file_name);
+    else { 
+        var a = document.createElement("a"), url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = file_name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+}
+
+function addButtons( generateF, getArgs, setArgs ){
     var app = document.getElementById("app");
+    var save = document.createElement("button");
+    save.id = 'save';
+    save.textContent = 'Save';
+    save.onclick = function() { 
+        args = getArgs();
+        downloadFiles( JSON.stringify(args), args.name + '.json', 'text/json' );
+    }
+    var load = document.createElement("input");
+    var loadb = document.createElement("button");
+    load.type = 'file'
+    load.id = 'load';
+    load.multiple = true;
+    loadb.id = 'loadb';
+    loadb.textContent = 'Load';
+    load.style = 'display: none;';
+    const upload = async (event) => {
+        // Convert the FileList into an array and iterate
+        let files = Array.from(event.target.files).map(file => {
+            // Define a new file reader
+            let reader = new FileReader();
+            // Create a new promise
+            return new Promise(resolve => {
+                // Resolve the promise after reading file
+                reader.onload = () => resolve(reader.result);
+                // Read the file as a text
+                reader.readAsText(file);
+            });
+        });
+        // At this point you'll have an array of results
+        let res = await Promise.all(files);
+        for ( var i in res )
+        {
+            console.log(res[i]);
+            setArgs( res[i] );
+        }
+    }
+    load.onchange = upload;
+    loadb.onclick = function() { load.click() }
     var generate = document.createElement("button");
     generate.id = 'generate';
     generate.textContent = 'Generate';
-    generate.onclick = clickf;
+    generate.onclick = generateF;
+    app.appendChild(save);
+    app.appendChild(load);
+    app.appendChild(loadb);
     app.appendChild(generate);
     // Append a line break
     app.appendChild(document.createElement("br"));
@@ -1371,6 +1454,19 @@ function addRecolorSubsets() {
     app.appendChild(document.createElement("br"));
 }
 
+function addPrintFullScale() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Print Full Scale: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "checkbox"
+    input.id = "print_full_scale";
+    input.checked = true
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
 function addScaleSelection() {
     addRoot()
     addChromaticFormula()
@@ -1378,8 +1474,33 @@ function addScaleSelection() {
     addScaleName()
     addSubsets()
     addRecolorSubsets()
+    addPrintFullScale()
 }
 
+function setDocumentFromArgs( args )
+{
+    /*
+    for ( var id in args )
+    {
+        console.log(input)
+        var input = document.getElementById( id );
+        if ( input != null )
+        {
+            if ( id != 'colors' )
+            {
+                if ( input.checked != null )
+                {
+                    input.checked = args[id]
+                }
+                else
+                {
+                    input.value = args[id];
+                }
+            }
+        }
+    }
+    */
+}
 function fretboarSite() {
 
 /**
@@ -1402,21 +1523,72 @@ var default_args = {
         'name': null,
         'subset': null,
         'intervals': null,
-        'recolor_intervals': false 
+        'recolor_intervals': false,
+        'print_full_scale': false
     },
     'inlay': {
         'pattern': null,
         'color': new Color('', '')
-    }
+    },
+    'name': ''
 }
 
-default_scale = {
-    'root': 'A',
-    'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
-    'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
-    'name': ['major', 'ionian'],
-    'subset': [1, 3, 5],
-    'intervals': [1, 2, 3, 4, 5, 6, 7] 
+function getArgs()
+{
+    args = JSON.parse(JSON.stringify(default_args))
+    args.tuning = removeItemAll(document.getElementById('tuning').value.split(' '), '')
+    args.frets = parseInt(document.getElementById('frets').value)
+    args.start = parseInt(document.getElementById('start').value)
+    args.end = parseInt(document.getElementById('end').value)
+    args.print_numbers = document.getElementById('print_numbers').checked
+    args.print_notes = document.getElementById('print_notes').checked
+
+    for (var i in default_args.colors) {
+        var fg_color = document.getElementById(`color_fg_${i}`).value
+        var bg_color = document.getElementById(`color_bg_${i}`).value
+        args.colors[i] = new Color(fg_color, bg_color)
+    }
+
+    args.scale.root = document.getElementById('root').value
+    if (document.getElementById('chromatic_selector').checked) {
+        chromatic_binary = []
+        removeItemAll(document.getElementById('chromatic_formula').value.split(' '), '').forEach(function(i) {
+            chromatic_binary.push(parseInt(i))
+        })
+        args.scale.chromatic_formula = chromatic_binary
+    } else if (document.getElementById('major_selector').checked) {
+        args.scale.major_formula = removeItemAll(document.getElementById('major_formula').value.split(' '), '')
+    } else if (document.getElementById('scale_name_selector').checked) {
+        args.scale.name = [document.getElementById('scale_name_select').value, document.getElementById('mode_name_select').value]
+    }
+
+    args.inlay.pattern = '*'
+    args.inlay.color = new Color(default_fg, '')
+    subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
+    intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
+    recolor_intervals = document.getElementById('recolor_intervals').checked
+    print_full_scale = document.getElementById('print_full_scale').checked
+    args.scale.subset = subset.map(numStr => parseInt(numStr))
+    args.scale.intervals = intervals.map(numStr => parseInt(numStr))
+    args.scale.recolor_intervals = recolor_intervals
+    args.scale.print_full_scale = print_full_scale
+    args.name = "args_" + args.scale.root + "_" + args.scale.name
+    console.log(args)
+    return args
+}
+
+function setArgs(text)
+{
+    args = JSON.parse(text)
+    for ( var i in args.colors )
+    {
+        args.colors[i] = Color.copy( args.colors[i] )
+    }
+    args.inlay.color = Color.copy( args.inlay.color );
+    console.log(args)
+    default_args = args
+    setDocumentFromArgs( args );
+    generateFretboards( args, true );
 }
 
 /**
@@ -1531,52 +1703,17 @@ function addOutputArgs() {
     addColors( default_args.colors )
 }
 
-function generateFretboards() {
-    var data = ''
-    args = JSON.parse(JSON.stringify(default_args))
-    args.tuning = removeItemAll(document.getElementById('tuning').value.split(' '), '')
-    args.frets = parseInt(document.getElementById('frets').value)
-    args.start = parseInt(document.getElementById('start').value)
-    args.end = parseInt(document.getElementById('end').value)
-    args.print_numbers = document.getElementById('print_numbers').checked
-    args.print_notes = document.getElementById('print_notes').checked
-
-    for (i = 0; i <= 12; i++) {
-        var fg_color = document.getElementById(`color_fg_${i}`).value
-        var bg_color = document.getElementById(`color_bg_${i}`).value
-        args.colors[i] = new Color(fg_color, bg_color)
-    }
-
-    args.scale.root = document.getElementById('root').value
-    if (document.getElementById('chromatic_selector').checked) {
-        chromatic_binary = []
-        removeItemAll(document.getElementById('chromatic_formula').value.split(' '), '').forEach(function(i) {
-            chromatic_binary.push(parseInt(i))
-        })
-        args.scale.chromatic_formula = chromatic_binary
-    } else if (document.getElementById('major_selector').checked) {
-        args.scale.major_formula = removeItemAll(document.getElementById('major_formula').value.split(' '), '')
-    } else if (document.getElementById('scale_name_selector').checked) {
-        args.scale.name = [document.getElementById('scale_name_select').value, document.getElementById('mode_name_select').value]
-    }
-
-    args.inlay.pattern = '*'
-    args.inlay.color = new Color(default_fg, '')
-    subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
-    intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
-    recolor_intervals = document.getElementById('recolor_intervals').checked
-    args.scale.subset = subset.map(numStr => parseInt(numStr))
-    args.scale.intervals = intervals.map(numStr => parseInt(numStr))
-    args.recolor_intervals = recolor_intervals
-    console.log(args)
+function generateFretboards( args, append=false ) {
     fretboards = getFretboardsWithName(args)
+    var data = ''
     for (i in fretboards) {
         var name = fretboards[i][0]
         var fretboard = fretboards[i][1]
         data += reset_code + name +'\n'
         data += fretboard.fullStr(args.start, args.end, args.print_notes, args.print_numbers, true) +'\n'
     }
-    document.getElementById('fretboard').innerHTML = convert.toHtml(data)
+    if (!append) { document.getElementById('fretboard').innerHTML = ''; }
+    document.getElementById('fretboard').innerHTML += convert.toHtml(data)
 }
 
 function addFretboardOutput(){
@@ -1593,7 +1730,7 @@ function addFretboardOutput(){
 
 addOutputArgs()
 addScaleSelection()
-addButtons( generateFretboards )
+addButtons( function(){ generateFretboards( getArgs() ) }, getArgs, setArgs )
 addFretboardOutput()
 
 }
@@ -1618,17 +1755,63 @@ var default_args = {
         'name': null,
         'subset': null,
         'intervals': null,
-        'recolor_intervals': false 
-    }
+        'recolor_intervals': false,
+        'print_full_scale': false
+    },
+    'name': ''
 }
 
-default_scale = {
-    'root': 'A',
-    'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
-    'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
-    'name': ['major', 'ionian'],
-    'subset': [1, 3, 5],
-    'intervals': [1, 2, 3, 4, 5, 6, 7] 
+function getArgs()
+{
+    args = JSON.parse(JSON.stringify(default_args))
+    args.keys = parseInt(document.getElementById('keys').value)
+    args.start = parseInt(document.getElementById('start').value)
+    args.end = parseInt(document.getElementById('end').value)
+    args.print_numbers = document.getElementById('print_numbers').checked
+    args.print_notes = document.getElementById('print_notes').checked
+
+    for (var i in default_args.colors) {
+        var fg_color = document.getElementById(`color_fg_${i}`).value
+        var bg_color = document.getElementById(`color_bg_${i}`).value
+        args.colors[i] = new Color(fg_color, bg_color)
+    }
+
+    args.scale.root = document.getElementById('root').value
+    if (document.getElementById('chromatic_selector').checked) {
+        chromatic_binary = []
+        removeItemAll(document.getElementById('chromatic_formula').value.split(' '), '').forEach(function(i) {
+            chromatic_binary.push(parseInt(i))
+        })
+        args.scale.chromatic_formula = chromatic_binary
+    } else if (document.getElementById('major_selector').checked) {
+        args.scale.major_formula = removeItemAll(document.getElementById('major_formula').value.split(' '), '')
+    } else if (document.getElementById('scale_name_selector').checked) {
+        args.scale.name = [document.getElementById('scale_name_select').value, document.getElementById('mode_name_select').value]
+    }
+
+    subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
+    intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
+    recolor_intervals = document.getElementById('recolor_intervals').checked
+    print_full_scale = document.getElementById('print_full_scale').checked
+    args.scale.subset = subset.map(numStr => parseInt(numStr))
+    args.scale.intervals = intervals.map(numStr => parseInt(numStr))
+    args.scale.recolor_intervals = recolor_intervals
+    args.scale.print_full_scale = print_full_scale
+    args.name = "args_" + args.scale.root + "_" + args.scale.name
+    console.log(args)
+    return args
+}
+
+function setArgs(text)
+{
+    args = JSON.parse(text)
+    for ( var i in args.colors )
+    {
+        args.colors[i] = Color.copy( args.colors[i] )
+    }
+    console.log(args)
+    default_args = args
+    setDocumentFromArgs( args )
 }
 
 /**
@@ -1729,48 +1912,16 @@ function addOutputArgs() {
 }
 
 function generateKeyboards() {
+    var args = getArgs();
+    keyboards = getKeyboardsWithName(args)
     var data = ''
-    args = JSON.parse(JSON.stringify(default_args))
-    args.keys = parseInt(document.getElementById('keys').value)
-    args.start = parseInt(document.getElementById('start').value)
-    args.end = parseInt(document.getElementById('end').value)
-    args.print_numbers = document.getElementById('print_numbers').checked
-    args.print_notes = document.getElementById('print_notes').checked
-
-    for (var i in default_args.colors) {
-        var fg_color = document.getElementById(`color_fg_${i}`).value
-        var bg_color = document.getElementById(`color_bg_${i}`).value
-        args.colors[i] = [fg_color, bg_color]
-    }
-
-    args.scale.root = document.getElementById('root').value
-    if (document.getElementById('chromatic_selector').checked) {
-        chromatic_binary = []
-        removeItemAll(document.getElementById('chromatic_formula').value.split(' '), '').forEach(function(i) {
-            chromatic_binary.push(parseInt(i))
-        })
-        args.scale.chromatic_formula = chromatic_binary
-    } else if (document.getElementById('major_selector').checked) {
-        args.scale.major_formula = removeItemAll(document.getElementById('major_formula').value.split(' '), '')
-    } else if (document.getElementById('scale_name_selector').checked) {
-        args.scale.name = [document.getElementById('scale_name_select').value, document.getElementById('mode_name_select').value]
-    }
-
-    subset = removeItemAll(document.getElementById('subset').value.split(' '), '')
-    intervals = removeItemAll(document.getElementById('intervals').value.split(' '), '')
-    recolor_intervals = document.getElementById('recolor_intervals').checked
-    args.scale.subset = subset.map(numStr => parseInt(numStr))
-    args.scale.intervals = intervals.map(numStr => parseInt(numStr))
-    args.recolor_intervals = recolor_intervals
-    console.log(args)
-    fretboards = getKeyboardsWithName(args)
-    for (i in fretboards) {
-        var name = fretboards[i][0]
-        var fretboard = fretboards[i][1]
+    for (i in keyboards) {
+        var name = keyboards[i][0]
+        var keyboard = keyboards[i][1]
         data += reset_code + name +'\n'
-        data += fretboard.fullStr(args.start, args.end, args.print_notes, args.print_numbers, true) +'\n'
+        data += keyboard.fullStr(args.start, args.end, args.print_notes, args.print_numbers, true) +'\n'
     }
-    document.getElementById('fretboard').innerHTML = convert.toHtml(data)
+    document.getElementById('keyboard').innerHTML = convert.toHtml(data)
 }
 
 function addKeyboardOutput(){
@@ -1778,15 +1929,15 @@ function addKeyboardOutput(){
     var app = document.getElementById("app");
     app.appendChild(document.createTextNode("Keyboard output: "));
     app.appendChild(document.createElement("br"));
-    var fretboardOutput = document.createElement("pre");
-    fretboardOutput.id = "fretboard";
-    app.appendChild(fretboardOutput);
+    var keyboardOutput = document.createElement("pre");
+    keyboardOutput.id = "keyboard";
+    app.appendChild(keyboardOutput);
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
 addOutputArgs()
 addScaleSelection()
-addButtons( generateKeyboards )
+addButtons( function(){ generateKeyboards( getArgs() ) }, getArgs, setArgs )
 addKeyboardOutput()
 
 }

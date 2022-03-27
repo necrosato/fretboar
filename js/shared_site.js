@@ -2,6 +2,15 @@
  * BEGIN WEB DISPLAY
  */
 
+default_scale = {
+    'root': 'A',
+    'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+    'major_formula': ['1', '2', '3', '4', '5', '6', '7'],
+    'name': ['major', 'ionian'],
+    'subset': [1, 3, 5],
+    'intervals': [1, 2, 3, 4, 5, 6, 7] 
+}
+
 var Convert = require('ansi-to-html');
 var convert = new Convert();
  
@@ -101,12 +110,70 @@ function addPrintNotes() {
     app.appendChild(document.createElement("br"));
 }
 
-function addButtons( clickf ){
+function downloadFiles(data, file_name, file_type) {
+    var file = new Blob([data], {type: file_type});
+    if (window.navigator.msSaveOrOpenBlob) 
+        window.navigator.msSaveOrOpenBlob(file, file_name);
+    else { 
+        var a = document.createElement("a"), url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = file_name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+}
+
+function addButtons( generateF, getArgs, setArgs ){
     var app = document.getElementById("app");
+    var save = document.createElement("button");
+    save.id = 'save';
+    save.textContent = 'Save';
+    save.onclick = function() { 
+        args = getArgs();
+        downloadFiles( JSON.stringify(args), args.name + '.json', 'text/json' );
+    }
+    var load = document.createElement("input");
+    var loadb = document.createElement("button");
+    load.type = 'file'
+    load.id = 'load';
+    load.multiple = true;
+    loadb.id = 'loadb';
+    loadb.textContent = 'Load';
+    load.style = 'display: none;';
+    const upload = async (event) => {
+        // Convert the FileList into an array and iterate
+        let files = Array.from(event.target.files).map(file => {
+            // Define a new file reader
+            let reader = new FileReader();
+            // Create a new promise
+            return new Promise(resolve => {
+                // Resolve the promise after reading file
+                reader.onload = () => resolve(reader.result);
+                // Read the file as a text
+                reader.readAsText(file);
+            });
+        });
+        // At this point you'll have an array of results
+        let res = await Promise.all(files);
+        for ( var i in res )
+        {
+            console.log(res[i]);
+            setArgs( res[i] );
+        }
+    }
+    load.onchange = upload;
+    loadb.onclick = function() { load.click() }
     var generate = document.createElement("button");
     generate.id = 'generate';
     generate.textContent = 'Generate';
-    generate.onclick = clickf;
+    generate.onclick = generateF;
+    app.appendChild(save);
+    app.appendChild(load);
+    app.appendChild(loadb);
     app.appendChild(generate);
     // Append a line break
     app.appendChild(document.createElement("br"));
@@ -287,6 +354,19 @@ function addRecolorSubsets() {
     app.appendChild(document.createElement("br"));
 }
 
+function addPrintFullScale() {
+    var app = document.getElementById("app");
+    app.appendChild(document.createTextNode("Print Full Scale: "));
+    // Create an <input> element, set its type and name attributes
+    var input = document.createElement("input");
+    input.type = "checkbox"
+    input.id = "print_full_scale";
+    input.checked = true
+    app.appendChild(input);
+    // Append a line break
+    app.appendChild(document.createElement("br"));
+}
+
 function addScaleSelection() {
     addRoot()
     addChromaticFormula()
@@ -294,5 +374,30 @@ function addScaleSelection() {
     addScaleName()
     addSubsets()
     addRecolorSubsets()
+    addPrintFullScale()
 }
 
+function setDocumentFromArgs( args )
+{
+    /*
+    for ( var id in args )
+    {
+        console.log(input)
+        var input = document.getElementById( id );
+        if ( input != null )
+        {
+            if ( id != 'colors' )
+            {
+                if ( input.checked != null )
+                {
+                    input.checked = args[id]
+                }
+                else
+                {
+                    input.value = args[id];
+                }
+            }
+        }
+    }
+    */
+}

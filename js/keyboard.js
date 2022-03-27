@@ -187,8 +187,12 @@ function getKeyboardsWithName(args) {
         keyboard.setColors(wcolors, bcolors)
         keyboards.push([`Mode Name ${args.scale.name}`, keyboard])
     }
+    if ( !args.scale.print_full_scale )
+    {
+        keyboards = []
+    }
     if (args.scale.subset && args.scale.intervals) {
-        var subsets = keyboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.recolor_intervals)
+        var subsets = keyboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.scale.recolor_intervals)
         for (i in subsets) {
             var intervals = subsets[i][0]
             var subset = subsets[i][1]

@@ -145,25 +145,33 @@ function getFretboardsWithName(args) {
     end = args.end == null ? args.frets : args.end
     fretboard = new Fretboard(args.tuning, args.frets, splitTopBottomDots(args.inlay.color, args.inlay.pattern))
 
+    var s = ''
     if (args.scale.major_formula != null) {
         fretboard.setMajorFormula(args.scale.major_formula, args.scale.root)
         fretboard.setColors(args.colors)
+        s = `${args.scale.major_formula}`
         fretboards.push([`Major Relative Scale Formula ${args.scale.major_formula}`, fretboard])
     } else if (args.scale.chromatic_formula != null) {
         fretboard.setChromaticFormula(args.scale.chromatic_formula, args.scale.root)
         fretboard.setColors(args.colors)
+        s = `${args.scale.chromatic_formula}`
         fretboards.push([`Chromatic Binary Scale Formula ${args.scale.chromatic_formula}`, fretboard])
     } else if (args.scale.name != null) {
         fretboard.setFromScaleName(args.scale.name[0], args.scale.name[1], args.scale.root, args.colors)
         fretboard.setColors(args.colors)
+        s = `${args.scale.name}`
         fretboards.push([`Mode Name ${args.scale.name}`, fretboard])
     }
+    if ( !args.scale.print_full_scale )
+    {
+        fretboards = []
+    }
     if (args.scale.subset && args.scale.intervals) {
-        var subsets = fretboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.recolor_intervals)
+        var subsets = fretboard.intervalSubsets(args.scale.subset, args.scale.intervals, args.scale.recolor_intervals)
         for (i in subsets) {
             var intervals = subsets[i][0]
             var subset = subsets[i][1]
-            fretboards.push([`Interval Subset (${intervals})`, subset])
+            fretboards.push([`${args.scale.root} ${s} Interval Subset (${intervals})`, subset])
         }
     }
     return fretboards
