@@ -332,22 +332,22 @@ function getKeyboardsWithName(args) {
     var wcolors = {}
     var bcolors = {}
     for (i in args.colors) {
-        if (args.colors[i][0] != '') {
-          if (args.colors[i][1] == 0)
+        if (args.colors[i].fb != '') {
+          if (args.colors[i].bg == '')
           {
-            wcolors[i] = new Color(args.colors[i][0], 'white')
-            bcolors[i] = new Color(args.colors[i][0], 'black')
+            wcolors[i] = new Color(args.colors[i].fg, 'white')
+            bcolors[i] = new Color(args.colors[i].fg, 'black')
           }
           else
           {
-            wcolors[i] = new Color(args.colors[i][0], args.colors[i][1])
-            bcolors[i] = new Color(args.colors[i][0], args.colors[i][1])
+            wcolors[i] = args.colors[i] 
+            bcolors[i] = args.colors[i] 
           }
         }
-        else if (args.colors[i][1] != '')
+        else if (args.colors[i].bg != '')
         {
-            wcolors[i] = new Color('black', args.colors[i][1])
-            bcolors[i] = new Color('white', args.colors[i][1])
+            wcolors[i] = new Color('black', args.colors[i].bg)
+            bcolors[i] = new Color('white', args.colors[i].bg)
         }
     }
     end = args.end == null ? args.keys : args.end
@@ -1952,7 +1952,7 @@ else if (window.location.href.includes("pianotroll.com"))
 }
 else 
 {
-  fretboarSite()
+  pianotrollSite()
 }
 
 },{"ansi-to-html":2}],2:[function(require,module,exports){
