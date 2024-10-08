@@ -64,7 +64,7 @@ function setColorsFromPreset() {
 
 function addColors( colors ) {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval: `));
+    app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval (note 0 is out of scale spaces): `));
     app.appendChild(document.createElement("br"));
     for ( var i in colors ) {
       addColor(i, colors[i].fg, colors[i].bg)

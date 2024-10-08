@@ -199,6 +199,9 @@ function addKeyboardOutput(){
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
+
+document.title = 'pianotroll'
+document.querySelector('h1').textContent = 'pianotroll'
 addOutputArgs()
 addScaleSelection()
 addButtons( function(){ generateKeyboards( getArgs() ) }, getArgs, setArgs )

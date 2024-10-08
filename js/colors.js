@@ -51,7 +51,7 @@ class Color {
 
 color_presets = {
   'default': {
-      0: new Color(default_fg, default_bg),
+      0: new Color('', ''),
       1: new Color(default_note_fg, default_note_bg),
       2: new Color(default_note_fg, default_note_bg),
       3: new Color(default_note_fg, default_note_bg),
@@ -81,7 +81,7 @@ color_presets = {
      12: new Color('', '')
   },
   'unique_bg': {
-      0: new Color(default_fg, default_bg),
+      0: new Color('', ''),
       1: new Color(default_note_fg, 'red'),
       2: new Color(default_note_fg, 'yellow'),
       3: new Color(default_note_fg, 'white'),

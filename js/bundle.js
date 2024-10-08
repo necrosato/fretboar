@@ -433,7 +433,7 @@ class Color {
 
 color_presets = {
   'default': {
-      0: new Color(default_fg, default_bg),
+      0: new Color('', ''),
       1: new Color(default_note_fg, default_note_bg),
       2: new Color(default_note_fg, default_note_bg),
       3: new Color(default_note_fg, default_note_bg),
@@ -463,7 +463,7 @@ color_presets = {
      12: new Color('', '')
   },
   'unique_bg': {
-      0: new Color(default_fg, default_bg),
+      0: new Color('', ''),
       1: new Color(default_note_fg, 'red'),
       2: new Color(default_note_fg, 'yellow'),
       3: new Color(default_note_fg, 'white'),
@@ -1165,7 +1165,7 @@ function setColorsFromPreset() {
 
 function addColors( colors ) {
     var app = document.getElementById("app");
-    app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval: `));
+    app.appendChild(document.createTextNode(`Set [foreground, background] color for nth note in scale/interval (note 0 is out of scale spaces): `));
     app.appendChild(document.createElement("br"));
     for ( var i in colors ) {
       addColor(i, colors[i].fg, colors[i].bg)
@@ -1538,9 +1538,9 @@ function getArgs()
 {
     args = JSON.parse(JSON.stringify(default_args))
     args.tuning = removeItemAll(document.getElementById('tuning').value.split(' '), '')
-    args.frets = parseInt(document.getElementById('frets').value)
+    args.frets = parseInt(document.getElementById('frets').value) + 1
     args.start = parseInt(document.getElementById('start').value)
-    args.end = parseInt(document.getElementById('end').value)
+    args.end = parseInt(document.getElementById('end').value) + 1
     args.print_numbers = document.getElementById('print_numbers').checked
     args.print_notes = document.getElementById('print_notes').checked
 
@@ -1621,13 +1621,13 @@ function addFrets() {
     var input = document.createElement("select");
     input.name = "frets";
     input.id = "frets";
-    for (var i = 1; i <=25; i++) {
+    for (var i = 0; i <=24; i++) {
         var option = document.createElement("option");
         option.value = i;
         option.text = i;
         input.appendChild(option);
     }
-    input.selectedIndex= default_args.frets-1
+    input.selectedIndex= default_args.frets
     input.onchange = setStartEndFromFrets
     app.appendChild(input);
     // Append a line break
@@ -1638,7 +1638,7 @@ function setStartFromFrets() {
     start = document.getElementById('start')
     oldStart = start.selectedIndex < 0 ? 0 : start.selectedIndex
     clearSelect(start)
-    var maxStart = document.getElementById('frets').value - 1
+    var maxStart = document.getElementById('frets').value
     for (var i = 0; i <= maxStart; i++) {
         var option = document.createElement("option");
         option.value = i;
@@ -1651,7 +1651,7 @@ function setStartFromFrets() {
 function setEndFromFrets() {
     end = document.getElementById('end')
     var maxEnd = document.getElementById('frets').value
-    var minEnd = parseInt(document.getElementById('start').value) + 1
+    var minEnd = parseInt(document.getElementById('start').value)
     clearSelect(end)
     for (var i = minEnd; i <= maxEnd; i++) {
         var option = document.createElement("option");
@@ -1729,6 +1729,8 @@ function addFretboardOutput(){
     app.appendChild(document.createElement("br"));
 }
 
+document.title = 'fretboar'
+document.querySelector('h1').textContent = 'fretboar'
 addOutputArgs()
 addScaleSelection()
 addButtons( function(){ generateFretboards( getArgs() ) }, getArgs, setArgs )
@@ -1936,6 +1938,9 @@ function addKeyboardOutput(){
     // Append a line break
     app.appendChild(document.createElement("br"));
 }
+
+document.title = 'pianotroll'
+document.querySelector('h1').textContent = 'pianotroll'
 addOutputArgs()
 addScaleSelection()
 addButtons( function(){ generateKeyboards( getArgs() ) }, getArgs, setArgs )
