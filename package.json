@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/necrosato/fretboard#readme",
   "dependencies": {
-    "ansi-to-html": "^0.6.15"
+    "ansi-to-html": "^0.6.15",
+    "browserify": "^17.0.1",
+    "uglify-js": "^3.19.3"
   },
   "devDependencies": {}
 }

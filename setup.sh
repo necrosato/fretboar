@@ -1,5 +1,5 @@
 #!/bin/bash
-npm i -g browserify
-npm i -g uglify-js
-npm i -g ansi-to-html
+npm i browserify
+npm i uglify-js
+npm i ansi-to-html
 

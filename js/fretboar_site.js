@@ -6,7 +6,7 @@ function fretboarSite() {
 
 var default_args = {
     'tuning': ['E', 'A', 'D', 'G', 'B', 'E'],
-    'frets': 15,
+    'frets': 24,
     'start': 0,
     'end': null,
     'print_notes': true,
