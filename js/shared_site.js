@@ -2,6 +2,19 @@
  * BEGIN WEB DISPLAY
  */
 
+function getRandomElement(array) {
+      const randomIndex = Math.floor(Math.random() * array.length);
+      return array[randomIndex];
+}
+
+function getDropdownArray(id) {
+    const dropdown = document.getElementById(id); // Replace "yourDropdownId" with the actual ID of your select element
+    const options = Array.from(dropdown.options); // Convert options to an array
+    return options.map(option => option.value); // Extract values from options
+}
+
+ROOTS = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab'];
+
 default_scale = {
     'root': 'A',
     'chromatic_formula': [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
@@ -127,6 +140,13 @@ function downloadFiles(data, file_name, file_type) {
     }
 }
 
+function randomizeScales() {
+    document.getElementById('root').value = getRandomElement(ROOTS);
+    document.getElementById('scale_name_select').value = getRandomElement(getDropdownArray('scale_name_select'));
+    setModeBox();
+    //document.getElementById('mode_name_select').value = getRandomElement(getDropdownArray('mode_name_select'));
+}
+
 function addButtons( generateF, getArgs, setArgs ){
     var app = document.getElementById("app");
     var save = document.createElement("button");
@@ -171,6 +191,12 @@ function addButtons( generateF, getArgs, setArgs ){
     generate.id = 'generate';
     generate.textContent = 'Generate';
     generate.onclick = generateF;
+    var randomize_scales = document.createElement("button");
+    randomize_scales.id = 'randomize';
+    randomize_scales.textContent = 'Randomize Scales';
+    randomize_scales.onclick = randomizeScales;
+    app.appendChild(randomize_scales);
+    app.appendChild(document.createElement("br"));
     app.appendChild(save);
     app.appendChild(load);
     app.appendChild(loadb);
@@ -272,6 +298,7 @@ function setScaleBox() {
 }
 
 function setModeBox() {
+    console.log('here');
     var modeBox = document.getElementById(`mode_name_select`)
     var scale = document.getElementById(`scale_name_select`).value
     clearSelect(modeBox)
