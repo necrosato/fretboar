@@ -403,28 +403,3 @@ function addScaleSelection() {
     addRecolorSubsets()
     addPrintFullScale()
 }
-
-function setDocumentFromArgs( args )
-{
-    /*
-    for ( var id in args )
-    {
-        console.log(input)
-        var input = document.getElementById( id );
-        if ( input != null )
-        {
-            if ( id != 'colors' )
-            {
-                if ( input.checked != null )
-                {
-                    input.checked = args[id]
-                }
-                else
-                {
-                    input.value = args[id];
-                }
-            }
-        }
-    }
-    */
-}

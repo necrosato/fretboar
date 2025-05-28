@@ -75,7 +75,6 @@ function setArgs(text)
     }
     console.log(args)
     default_args = args
-    setDocumentFromArgs( args )
 }
 
 /**

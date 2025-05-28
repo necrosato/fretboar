@@ -1504,31 +1504,6 @@ function addScaleSelection() {
     addRecolorSubsets()
     addPrintFullScale()
 }
-
-function setDocumentFromArgs( args )
-{
-    /*
-    for ( var id in args )
-    {
-        console.log(input)
-        var input = document.getElementById( id );
-        if ( input != null )
-        {
-            if ( id != 'colors' )
-            {
-                if ( input.checked != null )
-                {
-                    input.checked = args[id]
-                }
-                else
-                {
-                    input.value = args[id];
-                }
-            }
-        }
-    }
-    */
-}
 function fretboarSite() {
 
 /**
@@ -1615,7 +1590,6 @@ function setArgs(text)
     args.inlay.color = Color.copy( args.inlay.color );
     console.log(args)
     default_args = args
-    setDocumentFromArgs( args );
     generateFretboards( args, true );
 }
 
@@ -1841,7 +1815,6 @@ function setArgs(text)
     }
     console.log(args)
     default_args = args
-    setDocumentFromArgs( args )
 }
 
 /**
@@ -1984,8 +1957,8 @@ else if (window.location.href.includes("pianotroll.com"))
 }
 else 
 {
-  //fretboarSite()
-  pianotrollSite()
+  fretboarSite()
+  //pianotrollSite()
 }
 
 },{"ansi-to-html":2}],2:[function(require,module,exports){

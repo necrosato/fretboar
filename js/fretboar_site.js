@@ -84,7 +84,6 @@ function setArgs(text)
     args.inlay.color = Color.copy( args.inlay.color );
     console.log(args)
     default_args = args
-    setDocumentFromArgs( args );
     generateFretboards( args, true );
 }
 
